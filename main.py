@@ -268,7 +268,7 @@ def main():
     md_text = report.render_markdown(data, result, me_name, opp_names, title=name)
     md_path.write_text(md_text, encoding="utf-8")
     csv_path.write_text(report.render_csv(result), encoding="utf-8")
-    html_text = report.render_html(md_text, result, me_name, opp_names, title=name)
+    html_text = report.render_html(md_text, result, me_name, opp_names, data=data, title=name)
     html_path.write_text(html_text, encoding="utf-8")
     print(f"\nWrote:\n  {html_path}\n  {md_path}\n  {csv_path}")
 

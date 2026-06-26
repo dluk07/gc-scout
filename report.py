@@ -90,34 +90,13 @@ def render_markdown(data, result, me_name, opp_names, title="GameChanger Scoutin
                  f"{len(data['games'])} games across {len(data['teams'])} teams · "
                  f"home-field ≈ {_fmt_margin(result['home_adv'])} runs_\n")
 
-    # Headline projections
-    lines.append("## Saturday matchup projection\n")
+    # Interactive matchup explorer — the primary projection tool (picker + JS in HTML render)
+    lines.append("## Matchup explorer\n")
     lines.append(f"Your team: **<span class='team'>{me.get('display', me_name)}</span>** "
-                 f"(rating {_signed(me.get('massey',0))})\n")
-    for p in result["projections"]:
-        o = summ.get(p["opp"], {})
-        verdict = "you favored" if p["exp_margin"] > 0 else "opponent favored"
-        bits = [f"rating gap {_fmt_margin(p['massey_margin'])}"]
-        if p["common_margin"] is not None:
-            bits.append(f"common-opp {_fmt_margin(p['common_margin'])}")
-        if p["h2h_margin"] is not None:
-            bits.append(f"head-to-head {_fmt_margin(p['h2h_margin'])}")
-        m = p["matchup"]
-        lines.append(
-            f"- **vs <span class='team'>{o.get('display', p['opp'])}</span>** — projected "
-            f"{_signed(p['exp_margin'], ' runs')} ({verdict}), win prob {_pct(p['win_pct'])} "
-            f"· confidence: _{p['confidence']}_\n"
-            f"    - **Prepare for:** their offense is {_label_span(m['opp_off_label'])} "
-            f"({_signed(m['opp_off'])} adj) — likely to score ~**{m['exp_ra']:.0f}** on you; "
-            f"their defense is {_label_span(m['opp_def_label'])} "
-            f"({_signed(m['opp_def'])} adj) — you should put up ~**{m['exp_rs']:.0f}**.\n"
-            f"    - signals: {' · '.join(bits)}  ({p['n_common']} common opponents)"
-        )
-    # which is tougher
-    if len(result["projections"]) >= 2:
-        tough = min(result["projections"], key=lambda p: p["exp_margin"])
-        lines.append(f"\n**Tougher draw:** {summ.get(tough['opp'],{}).get('display', tough['opp'])} "
-                     f"(lowest projected margin for you).\n")
+                 f"— power rating {_signed(me.get('massey',0))}\n")
+    lines.append("_Pick an opponent from the tournament field to get the projection, what to "
+                 "prepare for, common opponents, and their last 5 games — computed instantly._\n")
+    lines.append("[[MATCHUP_EXPLORER]]")
 
     # Visual charts (replaced with Chart.js canvases in the HTML render)
     lines.append("\n## Power rankings & matchup map\n")
@@ -253,6 +232,15 @@ ul { padding-left: 1.2rem; }
 th.sortcol { cursor: pointer; user-select: none; white-space: nowrap; }
 th.sortcol:hover { background: #ffe6cf; }
 th .arrow { font-size: .8em; color: #ff6b00; }
+.mx { border: 1px solid #e3c9b0; border-radius: 8px; padding: .9rem 1.1rem;
+      margin: 1rem 0 1.6rem; background: #fffaf5; }
+.mx label { font-weight: 600; }
+.mx select { font-size: 1rem; padding: .3rem .5rem; margin-left: .4rem; border-radius: 6px;
+             border: 1px solid #ccc; background: #fff; color: inherit; }
+.mx .proj { font-size: 1.08rem; margin: .8rem 0 .3rem; }
+.mx .sig { color: #666; font-size: .9rem; }
+.mx h3 { margin-top: 1rem; }
+.mx h4 { margin: 1rem 0 .2rem; }
 @media (prefers-color-scheme: dark) {
   body { color: #e6e6e6; background: #1e1e1e; }
   h2 { border-color: #444; } th { background: #3a2a1a; }
@@ -263,6 +251,9 @@ th .arrow { font-size: .8em; color: #ff6b00; }
   .replist li { border-color: #383838; } .replist a { color: #fb923c; }
   .gen { color: #999; }
   th.sortcol:hover { background: #4a3520; } th .arrow { color: #fb923c; }
+  .mx { background: #241f1a; border-color: #4a3520; }
+  .mx select { background: #2a2a2a; border-color: #555; }
+  .mx .sig { color: #aaa; }
   .stat.good { color: #4ade80; } .stat.bad { color: #f87171; }
   .stat.neu { color: #d7dee8; } .stat.tough { color: #fb923c; } .stat.soft { color: #54c1f5; }
   .chart-wrap { background: #242424; border-color: #383838; }
@@ -375,9 +366,200 @@ new Chart(document.getElementById('offDefChart'), {{
     return power_canvas, offdef_canvas, script
 
 
+# ---------------------------------------------------------------- matchup explorer
+def _explorer_data(result, data, me_name, opp_names):
+    """Compact JSON payload so the page can recompute a projection for ANY team
+    client-side. Ratings are global (independent of opponent choice), so we only
+    need the per-team ratings + the games graph to reproduce project() in JS."""
+    summ = result["summary"]
+    od = result["off_def"]
+    teams = {}
+    for cn, s in summ.items():
+        teams[cn] = {
+            "d": s["display"], "seed": 1 if s["is_seed"] else 0,
+            "gp": s["gp"], "wp": round(s["win_pct"], 3), "am": round(s["avg_margin"], 2),
+            "ma": round(s["massey"], 2), "elo": round(s["elo"]),
+            "off": round(s["off"], 2), "def": round(s["def"], 2),
+            "rs": round(s["rs_pg"], 1), "ra": round(s["ra_pg"], 1),
+            "sos": round(s["sos"], 2), "l5": s["last5"],
+            "rec": _rec(s["api_record"]) if s["api_record"] else f"{s['w']}-{s['l']}-{s['t']}",
+        }
+    games = [[g["a"], g["b"], g["a_score"], g["b_score"], g.get("date", "")]
+             for g in data["games"]
+             if g["a"] and g["b"] and not g["a"].startswith("tbd")
+             and not g["b"].startswith("tbd")
+             and g["a_score"] is not None and g["b_score"] is not None]
+    default = next((o for o in opp_names if o), "")
+    return {"me": me_name, "mu": round(od["mu"], 3), "sigma": 3.6,
+            "def0": default, "teams": teams, "games": games}
+
+
+# plain JS (no Python interpolation) — GC is injected as a const just above it
+_EXPLORER_JS = """
+(function () {
+  const T = GC.teams, G = GC.games, ME = GC.me, MU = GC.mu, SIGMA = GC.sigma;
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function disp(cn){ return esc((T[cn] && T[cn].d) || cn); }
+  function fmtM(x){ return (x >= 0 ? '+' : '') + x.toFixed(1); }
+  function signed(x, unit, goodHigh){
+    unit = unit || ''; if (goodHigh === undefined) goodHigh = true;
+    var cls = (x >= 0.8) ? (goodHigh ? 'good' : 'bad')
+            : (x <= -0.8) ? (goodHigh ? 'bad' : 'good') : 'neu';
+    return "<span class='stat " + cls + "'>" + fmtM(x) + unit + "</span>";
+  }
+  function pct(p){ var c = p >= 0.55 ? 'good' : (p <= 0.45 ? 'bad' : 'neu');
+    return "<span class='stat " + c + "'>" + Math.round(p * 100) + "%</span>"; }
+  function sosSpan(x){ var c = x >= 0.4 ? 'tough' : (x <= -0.4 ? 'soft' : 'neu');
+    return "<span class='stat " + c + "'>" + fmtM(x) + "</span>"; }
+  function label(x){ return x >= 2 ? 'very strong' : x >= 0.8 ? 'strong'
+    : x > -0.8 ? 'average' : x > -2 ? 'weak' : 'very weak'; }
+  function labelSpan(w){ var c = (w === 'very strong' || w === 'strong') ? 'good'
+    : (w === 'weak' || w === 'very weak') ? 'bad' : 'neu';
+    return "<span class='stat " + c + "'>" + w + "</span>"; }
+  function mean(a){ return a.reduce(function (s, x){ return s + x; }, 0) / a.length; }
+
+  function commonOpps(me, opp){
+    var res = {};
+    G.forEach(function (g){
+      [[g[0], g[1], g[2], g[3]], [g[1], g[0], g[3], g[2]]].forEach(function (p){
+        var who = p[0], other = p[1], s = p[2], o = p[3];
+        if (who === me) { (res[other] = res[other] || {me: [], opp: []}).me.push(s - o); }
+        if (who === opp) { (res[other] = res[other] || {me: [], opp: []}).opp.push(s - o); }
+      });
+    });
+    var common = {};
+    Object.keys(res).forEach(function (t){
+      if (t === me || t === opp) return;
+      if (res[t].me.length && res[t].opp.length) common[t] = res[t];
+    });
+    return common;
+  }
+  function h2h(me, opp){
+    var out = [];
+    G.forEach(function (g){
+      if (g[0] === me && g[1] === opp) out.push(g[2] - g[3]);
+      else if (g[0] === opp && g[1] === me) out.push(g[3] - g[2]);
+    });
+    return out;
+  }
+  function project(opp){
+    var me = ME;
+    var mm = T[me].ma - T[opp].ma;
+    var common = commonOpps(me, opp);
+    var edges = Object.keys(common).map(function (t){ return mean(common[t].me) - mean(common[t].opp); });
+    var cm = edges.length ? mean(edges) : null;
+    var hh = h2h(me, opp);
+    var hm = hh.length ? mean(hh) : null;
+    var wMass = 1, wCom = Math.min(edges.length, 8) / 8 * 1.5, wH = Math.min(hh.length, 3) * 0.8;
+    var num = mm * wMass, den = wMass;
+    if (cm !== null) { num += cm * wCom; den += wCom; }
+    if (hm !== null) { num += hm * wH; den += wH; }
+    var blended = num / den;
+    var winp = 1 / (1 + Math.exp(-blended / SIGMA));
+    var cc = Object.keys(common).length;
+    var confScore = cc + (hh.length ? 2 : 0) + Math.min(T[opp].gp, 6) / 6;
+    var conf = confScore >= 5 ? 'moderate' : (confScore >= 3 ? 'low-moderate' : 'low');
+    var expRs = Math.max(0, MU + T[me].off - T[opp].def);
+    var expRa = Math.max(0, MU + T[opp].off - T[me].def);
+    return {mm: mm, cm: cm, hm: hm, blended: blended, winp: winp, cc: cc, conf: conf,
+            common: common, h2h: hh, expRs: expRs, expRa: expRa};
+  }
+  function card(cn){
+    var s = T[cn];
+    return "<h3>" + disp(cn) + "</h3><ul>"
+      + "<li>Record: <b>" + esc(s.rec) + "</b> (win% " + Math.round(s.wp * 100) + "%, last5 " + esc(s.l5) + ")</li>"
+      + "<li>Power (Massey): " + signed(s.ma, ' runs') + " &middot; Elo " + s.elo + "</li>"
+      + "<li>Offense: " + signed(s.off, ' runs') + " adj &middot; " + s.rs.toFixed(1) + " runs scored/game</li>"
+      + "<li>Defense: " + signed(s.def, ' runs') + " adj &middot; " + s.ra.toFixed(1) + " runs allowed/game</li>"
+      + "<li>Strength of schedule: " + sosSpan(s.sos) + " &middot; Avg margin: " + signed(s.am, ' runs') + " over " + s.gp + " games</li>"
+      + "</ul>";
+  }
+  function commonTable(common){
+    var keys = Object.keys(common);
+    if (!keys.length) return "<p><em>No common opponents found in the data.</em></p>";
+    keys.sort(function (a, b){
+      return (mean(common[b].me) - mean(common[b].opp)) - (mean(common[a].me) - mean(common[a].opp));
+    });
+    var rows = "<table><thead><tr><th>Common opponent</th><th>Your result(s)</th>"
+      + "<th>Their result(s)</th><th>Edge</th></tr></thead><tbody>";
+    keys.forEach(function (t){
+      var d = common[t], edge = mean(d.me) - mean(d.opp);
+      rows += "<tr><td>" + disp(t) + "</td><td>" + d.me.map(fmtM).join(', ')
+        + "</td><td>" + d.opp.map(fmtM).join(', ') + "</td><td>" + signed(edge) + "</td></tr>";
+    });
+    return rows + "</tbody></table>";
+  }
+  function last5Table(opp){
+    var gs = [];
+    G.forEach(function (g){
+      var date = g[4] || "";
+      if (g[0] === opp) gs.push({date: date, other: g[1], ts: g[2], os: g[3]});
+      else if (g[1] === opp) gs.push({date: date, other: g[0], ts: g[3], os: g[2]});
+    });
+    gs.sort(function (a, b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+    gs = gs.slice(0, 5);
+    if (!gs.length) return "<p><em>No recent games in the data.</em></p>";
+    var rows = "<table><thead><tr><th>Date</th><th>Opponent</th><th>Score</th>"
+      + "<th>Result</th></tr></thead><tbody>";
+    gs.forEach(function (g){
+      var res = g.ts > g.os ? "W" : (g.ts < g.os ? "L" : "T");
+      var cls = res === "W" ? "good" : (res === "L" ? "bad" : "neu");
+      rows += "<tr><td>" + esc(g.date || "—") + "</td><td>" + disp(g.other) + "</td><td>"
+        + g.ts + "&ndash;" + g.os + "</td><td><span class='stat " + cls + "'>" + res + "</span></td></tr>";
+    });
+    return rows + "</tbody></table>";
+  }
+  function render(opp){
+    var p = project(opp);
+    var verdict = p.blended > 0 ? 'you favored' : 'opponent favored';
+    var h = "";
+    h += "<p class='proj'><b>vs <span class='team'>" + disp(opp) + "</span></b> &mdash; projected "
+      + signed(p.blended, ' runs') + " (" + verdict + "), win prob " + pct(p.winp)
+      + " &middot; confidence: <em>" + p.conf + "</em></p>";
+    h += "<p><b>Prepare for:</b> their offense is " + labelSpan(label(T[opp].off)) + " ("
+      + signed(T[opp].off) + " adj) &mdash; likely to score ~<b>" + Math.round(p.expRa) + "</b> on you; "
+      + "their defense is " + labelSpan(label(T[opp].def)) + " (" + signed(T[opp].def)
+      + " adj) &mdash; you should put up ~<b>" + Math.round(p.expRs) + "</b>.</p>";
+    h += "<p class='sig'>signals: rating gap " + fmtM(p.mm)
+      + (p.cm !== null ? " &middot; common-opp " + fmtM(p.cm) : "")
+      + (p.hm !== null ? " &middot; head-to-head " + fmtM(p.hm) : "")
+      + " (" + p.cc + " common opponents)</p>";
+    h += card(opp);
+    h += "<h4>Common opponents vs you</h4>" + commonTable(p.common);
+    h += "<h4>" + disp(opp) + " &mdash; last 5 games</h4>" + last5Table(opp);
+    document.getElementById('mx-out').innerHTML = h;
+  }
+  var sel = document.getElementById('mx-pick');
+  if (!sel) return;
+  Object.keys(T).filter(function (cn){ return cn !== ME && T[cn].seed; })
+    .sort(function (a, b){ return T[a].d.localeCompare(T[b].d); })
+    .forEach(function (cn){
+      var o = document.createElement('option');
+      o.value = cn; o.textContent = T[cn].d; sel.appendChild(o);
+    });
+  sel.addEventListener('change', function (){ if (sel.value) render(sel.value); });
+  if (sel.options.length) {
+    var d0 = GC.def0;
+    var has = Array.prototype.some.call(sel.options, function (o){ return o.value === d0; });
+    sel.value = has ? d0 : sel.options[0].value;
+    render(sel.value);
+  }
+})();
+"""
+
+
+def _explorer_html(result, data, me_name, opp_names):
+    import json
+    payload = json.dumps(_explorer_data(result, data, me_name, opp_names))
+    container = ("<div class='mx'><label for='mx-pick'>Pick your next opponent:</label>"
+                 "<select id='mx-pick'></select>"
+                 "<div id='mx-out'></div></div>")
+    script = "<script>\nconst GC = " + payload + ";\n" + _EXPLORER_JS + "\n</script>"
+    return container, script
+
+
 _SORT_SCRIPT = """
 <script>
-(function () {
   function num(cell) {
     var n = parseFloat((cell.textContent || "").replace(/[^0-9.+-]/g, ""));
     return isNaN(n) ? null : n;
@@ -430,7 +612,7 @@ _SORT_SCRIPT = """
 """
 
 
-def render_html(md_text, result, me_name, opp_names, title="GC Scouting Report"):
+def render_html(md_text, result, me_name, opp_names, data=None, title="GC Scouting Report"):
     import re
     import markdown
     body = markdown.markdown(md_text, extensions=["tables", "sane_lists"])
@@ -441,10 +623,17 @@ def render_html(md_text, result, me_name, opp_names, title="GC Scouting Report")
     # markdown wraps a lone sentinel line in <p>…</p>; swap those for the canvases
     body = body.replace("<p>[[POWER_CHART]]</p>", power_canvas)
     body = body.replace("<p>[[OFFDEF_CHART]]</p>", offdef_canvas)
+    # interactive matchup explorer (needs the games graph from `data`)
+    explorer_script = ""
+    if data is not None:
+        container, explorer_script = _explorer_html(result, data, me_name, opp_names)
+        body = body.replace("<p>[[MATCHUP_EXPLORER]]</p>", container)
+    else:
+        body = body.replace("<p>[[MATCHUP_EXPLORER]]</p>", "")
     return (f"<!doctype html><html><head><meta charset='utf-8'>"
             f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
             f"<title>{html.escape(title)}</title><style>{_CSS}</style></head>"
-            f"<body>{body}{script}{_SORT_SCRIPT}</body></html>")
+            f"<body>{body}{script}{explorer_script}{_SORT_SCRIPT}</body></html>")
 
 
 def render_index(entries, heading="8U Scouting Reports"):

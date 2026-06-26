@@ -1,0 +1,704 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>8C Scouting Report for NorCal Tournament</title><style>
+:root { color-scheme: light dark; }
+body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+       max-width: 860px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.5;
+       color: #1a1a1a; background: #fff; }
+h1 { border-bottom: 3px solid #ff6b00; padding-bottom: .3rem; }
+h2 { margin-top: 1.8rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+h3 { margin-top: 1.2rem; color: #c2410c; }
+em { color: #666; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1.2rem; font-size: .93rem; }
+th, td { border: 1px solid #ddd; padding: .4rem .6rem; text-align: left; }
+th { background: #fff3e8; }
+tr:nth-child(even) td { background: #faf7f4; }
+tr.you td { background: #fff3d6; box-shadow: inset 3px 0 0 #ff6b00; font-weight: 600; }
+tr.opp td { background: #e3f6f2; box-shadow: inset 3px 0 0 #0d9488; }
+.youbadge { background: #ff6b00; color: #fff; font-size: .72rem; font-weight: 700;
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+.oppbadge { background: #0d9488; color: #fff; font-size: .72rem; font-weight: 700;
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+code { background: #f2f2f2; padding: .1rem .3rem; border-radius: 3px; }
+ul { padding-left: 1.2rem; }
+.team { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+.stat { font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat.good  { color: #15803d; }   /* green  — strong / favorable */
+.stat.bad   { color: #b91c1c; }   /* red    — weak / unfavorable */
+.stat.neu   { color: #555; }      /* gray   — middle of the pack  */
+.stat.tough { color: #c2410c; }   /* amber  — hard schedule       */
+.stat.soft  { color: #0369a1; }   /* blue   — soft schedule       */
+.chart-wrap { margin: 1rem 0 1.6rem; padding: .8rem 1rem; border: 1px solid #eee;
+              border-radius: 8px; background: #fff; }
+.chart-wrap canvas { max-width: 100%; }
+.replist { list-style: none; padding-left: 0; }
+.replist li { padding: .55rem .2rem; border-bottom: 1px solid #eee; display: flex;
+              flex-wrap: wrap; align-items: baseline; gap: .2rem .8rem; }
+.replist a { font-weight: 600; font-size: 1.05rem; text-decoration: none; color: #c2410c; }
+.replist a:hover { text-decoration: underline; }
+.gen { color: #888; font-size: .85rem; }
+th.sortcol { cursor: pointer; user-select: none; white-space: nowrap; }
+th.sortcol:hover { background: #ffe6cf; }
+th .arrow { font-size: .8em; color: #ff6b00; }
+.mx { border: 1px solid #e3c9b0; border-radius: 8px; padding: .9rem 1.1rem;
+      margin: 1rem 0 1.6rem; background: #fffaf5; }
+.mx label { font-weight: 600; }
+.mx select { font-size: 1rem; padding: .3rem .5rem; margin-left: .4rem; border-radius: 6px;
+             border: 1px solid #ccc; background: #fff; color: inherit; }
+.mx .proj { font-size: 1.08rem; margin: .8rem 0 .3rem; }
+.mx .sig { color: #666; font-size: .9rem; }
+.mx h3 { margin-top: 1rem; }
+.mx h4 { margin: 1rem 0 .2rem; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #1e1e1e; }
+  h2 { border-color: #444; } th { background: #3a2a1a; }
+  tr:nth-child(even) td { background: #262626; } code { background: #333; }
+  tr.you td { background: #3a2f1a; }
+  tr.opp td { background: #16302c; }
+  th, td { border-color: #444; }
+  .replist li { border-color: #383838; } .replist a { color: #fb923c; }
+  .gen { color: #999; }
+  th.sortcol:hover { background: #4a3520; } th .arrow { color: #fb923c; }
+  .mx { background: #241f1a; border-color: #4a3520; }
+  .mx select { background: #2a2a2a; border-color: #555; }
+  .mx .sig { color: #aaa; }
+  .stat.good { color: #4ade80; } .stat.bad { color: #f87171; }
+  .stat.neu { color: #d7dee8; } .stat.tough { color: #fb923c; } .stat.soft { color: #54c1f5; }
+  .chart-wrap { background: #242424; border-color: #383838; }
+}
+</style></head><body><h1>8C Scouting Report for NorCal Tournament</h1>
+<p><em>Generated 2026-06-26 13:53 · 257 games across 87 teams · home-field ≈ -0.5 runs</em></p>
+<h2>Matchup explorer</h2>
+<p>Your team: <strong><span class='team'>8U Mischiefs C 8U</span></strong> — power rating <span class='stat good'>+4.0</span></p>
+<p><em>Pick an opponent from the tournament field to get the projection, what to prepare for, common opponents, and their last 5 games — computed instantly.</em></p>
+<div class='mx'><label for='mx-pick'>Pick your next opponent:</label><select id='mx-pick'></select><div id='mx-out'></div></div>
+<h2>Power rankings &amp; matchup map</h2>
+<div class='chart-wrap'><canvas id='powerChart' height='260'></canvas></div>
+<p><em>Offense vs. defense — top-right = strong both sides; bottom-left = beatable both sides. Your team is highlighted.</em></p>
+<div class='chart-wrap'><canvas id='offDefChart' height='340'></canvas></div>
+<h2>Scouting cards</h2>
+<h3>8U Mischiefs C 8U</h3>
+<ul>
+<li>Record: <strong>9-11-1</strong>  (win% 48%, last5 3-2)</li>
+<li>Power rating (Massey): <span class='stat good'>+4.0 runs</span>  ·  Elo 1554</li>
+<li>Offense: <span class='stat good'>+2.3 runs</span> adj  ·  5.5 runs scored/game</li>
+<li>Defense: <span class='stat good'>+1.6 runs</span> adj  ·  4.4 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat tough'>+2.9</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat good'>+1.1 runs</span> over 22 games</li>
+</ul>
+<h3>8u Slammers Comp</h3>
+<ul>
+<li>Record: <strong>9-9-0</strong>  (win% 45%, last5 2-3)</li>
+<li>Power rating (Massey): <span class='stat good'>+2.6 runs</span>  ·  Elo 1443</li>
+<li>Offense: <span class='stat good'>+1.8 runs</span> adj  ·  4.1 runs scored/game</li>
+<li>Defense: <span class='stat neu'>+0.6 runs</span> adj  ·  5.5 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat tough'>+4.2</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat bad'>-1.4 runs</span> over 22 games</li>
+</ul>
+<p><strong>Common opponents vs you:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Common opponent</th>
+<th>Your result(s)</th>
+<th>Their result(s)</th>
+<th>Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blaze 8u Sullivan 8U</td>
+<td>+7.0</td>
+<td>-8.0</td>
+<td>+15.0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td>-1.0, -2.0</td>
+<td>-7.0, -11.0, -9.0</td>
+<td>+7.5</td>
+</tr>
+<tr>
+<td>WVSlammers 8U Red Summer All Stars</td>
+<td>-1.0</td>
+<td>-10.0, -6.0</td>
+<td>+7.0</td>
+</tr>
+<tr>
+<td>San Bruno Storm 8C - Junio</td>
+<td>-1.0</td>
+<td>-2.0</td>
+<td>+1.0</td>
+</tr>
+<tr>
+<td>8C Burlingame Flames 2026 8U</td>
+<td>-4.0</td>
+<td>+2.0, +5.0, +1.0</td>
+<td>-6.7</td>
+</tr>
+<tr>
+<td>Force 8U Comp</td>
+<td>-5.0, -9.0</td>
+<td>+1.0</td>
+<td>-8.0</td>
+</tr>
+<tr>
+<td>Redhawks 8U Red</td>
+<td>+3.0, +0.0</td>
+<td>+12.0, +10.0</td>
+<td>-9.5</td>
+</tr>
+</tbody>
+</table>
+<h3>Wicked Purple 8U</h3>
+<ul>
+<li>Record: <strong>9-1-0</strong>  (win% 86%, last5 4-1)</li>
+<li>Power rating (Massey): <span class='stat good'>+5.8 runs</span>  ·  Elo 1682</li>
+<li>Offense: <span class='stat good'>+2.9 runs</span> adj  ·  7.5 runs scored/game</li>
+<li>Defense: <span class='stat good'>+2.9 runs</span> adj  ·  1.7 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat neu'>-0.4</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat good'>+5.8 runs</span> over 14 games</li>
+</ul>
+<p><strong>Common opponents vs you:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Common opponent</th>
+<th>Your result(s)</th>
+<th>Their result(s)</th>
+<th>Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Steal Breeze Fahy 8U</td>
+<td>+10.0</td>
+<td>+5.0, +7.0</td>
+<td>+4.0</td>
+</tr>
+<tr>
+<td>West County Wildcats 8U</td>
+<td>+10.0</td>
+<td>+7.0</td>
+<td>+3.0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td>-1.0, -2.0</td>
+<td>-1.0, -3.0</td>
+<td>+0.5</td>
+</tr>
+</tbody>
+</table>
+<h2>Strength of schedule (seed teams)</h2>
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>SoS</th>
+<th>Power</th>
+<th>Offense</th>
+<th>Defense</th>
+<th>Record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>San Bruno Storm 8C - Junio</td>
+<td><span class='stat tough'>+5.7</span></td>
+<td><span class='stat good'>+7.1</span></td>
+<td><span class='stat good'>+2.1</span></td>
+<td><span class='stat good'>+4.8</span></td>
+<td>7-4-2</td>
+</tr>
+<tr>
+<td>Force 8U Comp</td>
+<td><span class='stat tough'>+5.2</span></td>
+<td><span class='stat good'>+7.9</span></td>
+<td><span class='stat good'>+3.9</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td>12-8-0</td>
+</tr>
+<tr>
+<td>Redhawks 8U Red</td>
+<td><span class='stat tough'>+5.2</span></td>
+<td><span class='stat neu'>-0.0</span></td>
+<td><span class='stat neu'>+0.7</span></td>
+<td><span class='stat bad'>-0.8</span></td>
+<td>2-13-1</td>
+</tr>
+<tr>
+<td>Redwood City Wicked 8C - Cho</td>
+<td><span class='stat tough'>+4.9</span></td>
+<td><span class='stat good'>+9.2</span></td>
+<td><span class='stat good'>+3.7</span></td>
+<td><span class='stat good'>+5.3</span></td>
+<td>18-3-2</td>
+</tr>
+<tr>
+<td>8C Burlingame Flames 2026 8U</td>
+<td><span class='stat tough'>+4.9</span></td>
+<td><span class='stat good'>+4.4</span></td>
+<td><span class='stat good'>+3.5</span></td>
+<td><span class='stat neu'>+0.8</span></td>
+<td>10-13-0</td>
+</tr>
+<tr class='opp'><td><strong>8u Slammers Comp</strong> <span class='oppbadge'>next opp</span></td>
+<td><span class='stat tough'>+4.2</span></td>
+<td><span class='stat good'>+2.6</span></td>
+<td><span class='stat good'>+1.8</span></td>
+<td><span class='stat neu'>+0.6</span></td>
+<td>9-9-0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td><span class='stat tough'>+4.0</span></td>
+<td><span class='stat good'>+6.1</span></td>
+<td><span class='stat good'>+2.4</span></td>
+<td><span class='stat good'>+3.5</span></td>
+<td>15-3-2</td>
+</tr>
+<tr>
+<td>Livermore Smoke 8U - Summer 26’</td>
+<td><span class='stat tough'>+3.5</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td><span class='stat neu'>+0.3</span></td>
+<td><span class='stat good'>+3.4</span></td>
+<td>6-6-1</td>
+</tr>
+<tr>
+<td>WVSlammers 8U Red Summer All Stars</td>
+<td><span class='stat tough'>+3.3</span></td>
+<td><span class='stat good'>+8.3</span></td>
+<td><span class='stat good'>+3.9</span></td>
+<td><span class='stat good'>+4.3</span></td>
+<td>17-3-0</td>
+</tr>
+<tr class='you'><td><strong>8U Mischiefs C 8U</strong> <span class='youbadge'>you</span></td>
+<td><span class='stat tough'>+2.9</span></td>
+<td><span class='stat good'>+4.0</span></td>
+<td><span class='stat good'>+2.3</span></td>
+<td><span class='stat good'>+1.6</span></td>
+<td>9-11-1</td>
+</tr>
+<tr>
+<td>SRVGAL Stompers Elite 8U-Valdivia</td>
+<td><span class='stat tough'>+1.5</span></td>
+<td><span class='stat good'>+4.9</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td>7-3-0</td>
+</tr>
+<tr>
+<td>Foster City Flash 8U</td>
+<td><span class='stat tough'>+0.8</span></td>
+<td><span class='stat good'>+1.7</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td><span class='stat neu'>+0.6</span></td>
+<td>12-5-3</td>
+</tr>
+<tr>
+<td>Blaze 8u Sullivan 8U</td>
+<td><span class='stat neu'>+0.2</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat neu'>-0.7</span></td>
+<td><span class='stat good'>+0.8</span></td>
+<td>6-4-0</td>
+</tr>
+<tr>
+<td>Steal Breeze Fahy 8U</td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat neu'>-0.1</span></td>
+<td><span class='stat neu'>-0.1</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td>6-3-1</td>
+</tr>
+<tr>
+<td>Milpitas 8u AS 2026</td>
+<td><span class='stat neu'>-0.0</span></td>
+<td><span class='stat bad'>-1.3</span></td>
+<td><span class='stat bad'>-1.7</span></td>
+<td><span class='stat neu'>+0.4</span></td>
+<td>4-5-0</td>
+</tr>
+<tr class='opp'><td><strong>Wicked Purple 8U</strong> <span class='oppbadge'>next opp</span></td>
+<td><span class='stat neu'>-0.4</span></td>
+<td><span class='stat good'>+5.8</span></td>
+<td><span class='stat good'>+2.9</span></td>
+<td><span class='stat good'>+2.9</span></td>
+<td>9-1-0</td>
+</tr>
+<tr>
+<td>Almaden Lightning 8U</td>
+<td><span class='stat soft'>-0.4</span></td>
+<td><span class='stat good'>+3.0</span></td>
+<td><span class='stat good'>+2.1</span></td>
+<td><span class='stat good'>+1.0</span></td>
+<td>8-1-0</td>
+</tr>
+<tr>
+<td>Legacy 8U</td>
+<td><span class='stat soft'>-0.6</span></td>
+<td><span class='stat good'>+2.4</span></td>
+<td><span class='stat good'>+1.3</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td>3-1-0</td>
+</tr>
+<tr>
+<td>PHBA Panthers 8u Red - McLennan 8U</td>
+<td><span class='stat soft'>-1.0</span></td>
+<td><span class='stat neu'>-0.2</span></td>
+<td><span class='stat good'>+2.8</span></td>
+<td><span class='stat bad'>-3.0</span></td>
+<td>2-2-0</td>
+</tr>
+<tr>
+<td>Windsor Wicked Gray 8U</td>
+<td><span class='stat soft'>-1.5</span></td>
+<td><span class='stat bad'>-2.0</span></td>
+<td><span class='stat neu'>+0.5</span></td>
+<td><span class='stat bad'>-2.4</span></td>
+<td>3-6-0</td>
+</tr>
+<tr>
+<td>Vacaville All Stars 8U</td>
+<td><span class='stat soft'>-1.7</span></td>
+<td><span class='stat neu'>-0.8</span></td>
+<td><span class='stat good'>+2.3</span></td>
+<td><span class='stat bad'>-3.0</span></td>
+<td>6-4-0</td>
+</tr>
+<tr>
+<td>WV Slammers Blue 8U-Hernandez</td>
+<td><span class='stat soft'>-1.9</span></td>
+<td><span class='stat bad'>-0.9</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat bad'>-0.9</span></td>
+<td>9-9-0</td>
+</tr>
+</tbody>
+</table>
+<h2>Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Power rating (Massey)</strong></td>
+<td>Overall strength in runs vs. an average team in this pool. +3 ≈ three runs better than average. Solved by least-squares over every game margin.</td>
+</tr>
+<tr>
+<td><strong>Elo</strong></td>
+<td>Independent strength score (starts at 1500) updated game-by-game; a cross-check on Massey. Higher = stronger; ~100 pts ≈ a meaningful gap.</td>
+</tr>
+<tr>
+<td><strong>Offense (adj)</strong></td>
+<td>Opponent-adjusted runs scored vs. average. +1.5 means they score ~1.5 runs more than a typical team would against the <em>same</em> defenses.</td>
+</tr>
+<tr>
+<td><strong>Defense (adj)</strong></td>
+<td>Opponent-adjusted runs <em>prevented</em> vs. average. <strong>Positive = good defense</strong> (they allow fewer runs than a typical team would vs. the same offenses).</td>
+</tr>
+<tr>
+<td><strong>runs scored/allowed per game</strong></td>
+<td>Raw, unadjusted averages — easy to read but flattered or punished by schedule strength.</td>
+</tr>
+<tr>
+<td><strong>Strength of schedule (SoS)</strong></td>
+<td>Average power rating of the opponents a team has faced. Amber = tough slate, blue = soft slate.</td>
+</tr>
+<tr>
+<td><strong>Projected runs / win prob</strong></td>
+<td>Expected final margin and win chance for your matchup, blending the rating gap, common opponents, and any head-to-head.</td>
+</tr>
+<tr>
+<td><strong>Common opponents</strong></td>
+<td>Teams both you and the opponent have played; comparing your margins vs. theirs controls for schedule.</td>
+</tr>
+<tr>
+<td><strong>Head-to-head (h2h)</strong></td>
+<td>Games you've played against that opponent directly.</td>
+</tr>
+<tr>
+<td><strong>Confidence</strong></td>
+<td>How much data backs the projection (common-opponent count + h2h + games played).</td>
+</tr>
+<tr>
+<td><strong>Home-field</strong></td>
+<td>Estimated run value of playing at home, from the model.</td>
+</tr>
+</tbody>
+</table>
+<h2>Notes &amp; caveats</h2>
+<ul>
+<li>Ratings come from a Massey least-squares model on game margins (home-field + ridge regularization); Elo is a chronological cross-check.</li>
+<li>Offense/Defense ratings are a separate opponent-adjusted least-squares split, so facing weak teams inflates raw runs but not the adjusted numbers.</li>
+<li>Only <strong>seed teams</strong> (ids you passed) have full schedules; other teams appear only via games against the seeds, so their ratings are based on partial data.</li>
+<li>Youth results are noisy and team-name matching across feeds is fuzzy — treat projections as directional. Confidence reflects common-opponent count + head-to-head.</li>
+<li>To deepen strength-of-schedule, add more team ids as seeds (see the unresolved opponents listed by <code>main.py</code>).</li>
+</ul>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+const POWER = {"labels": ["Redwood City Wi\u2026", "WVSlammers 8U R\u2026", "Force 8U Comp", "San Bruno Storm\u2026", "Rebels Black - \u2026", "Wicked Purple 8U", "SRVGAL Stompers\u2026", "8C Burlingame F\u2026", "8U Mischiefs C \u2026", "Livermore Smoke\u2026", "Almaden Lightni\u2026", "8u Slammers Comp", "Legacy 8U", "Foster City Fla\u2026", "Blaze 8u Sulliv\u2026", "Redhawks 8U Red", "Steal Breeze Fa\u2026", "PHBA Panthers 8\u2026", "Vacaville All S\u2026", "WV Slammers Blu\u2026", "Milpitas 8u AS \u2026", "Windsor Wicked \u2026"], "values": [9.21, 8.35, 7.94, 7.09, 6.11, 5.84, 4.92, 4.4, 3.98, 3.77, 3.03, 2.64, 2.38, 1.72, 0.1, -0.02, -0.1, -0.22, -0.79, -0.88, -1.32, -1.99], "colors": ["#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#0d9488", "#9ca3af", "#9ca3af", "#ff6b00", "#9ca3af", "#9ca3af", "#0d9488", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af"]};
+const OFFDEF = {"You": [{"x": 2.27, "y": 1.56, "label": "8U Mischiefs C 8U"}], "Opponents": [{"x": 1.85, "y": 0.64, "label": "8u Slammers Comp"}, {"x": 2.9, "y": 2.92, "label": "Wicked Purple 8U"}], "Other": [{"x": 2.43, "y": 3.53, "label": "Rebels Black - Mc\u2026"}, {"x": 2.1, "y": 4.83, "label": "San Bruno Storm 8\u2026"}, {"x": 0.68, "y": -0.82, "label": "Redhawks 8U Red"}, {"x": 3.95, "y": 3.83, "label": "Force 8U Comp"}, {"x": 3.94, "y": 4.28, "label": "WVSlammers 8U Red\u2026"}, {"x": -0.15, "y": 0.09, "label": "Steal Breeze Fahy\u2026"}, {"x": 3.49, "y": 0.77, "label": "8C Burlingame Fla\u2026"}, {"x": -1.68, "y": 0.36, "label": "Milpitas 8u AS 20\u2026"}, {"x": 0.26, "y": 3.36, "label": "Livermore Smoke 8\u2026"}, {"x": 3.7, "y": 5.35, "label": "Redwood City Wick\u2026"}, {"x": 1.11, "y": 3.75, "label": "SRVGAL Stompers E\u2026"}, {"x": 0.53, "y": -2.42, "label": "Windsor Wicked Gr\u2026"}, {"x": 1.07, "y": 0.63, "label": "Foster City Flash\u2026"}, {"x": 2.31, "y": -3.03, "label": "Vacaville All Sta\u2026"}, {"x": 2.81, "y": -2.97, "label": "PHBA Panthers 8u \u2026"}, {"x": 2.1, "y": 0.97, "label": "Almaden Lightning\u2026"}, {"x": 0.12, "y": -0.87, "label": "WV Slammers Blue \u2026"}, {"x": -0.69, "y": 0.81, "label": "Blaze 8u Sullivan\u2026"}, {"x": 1.27, "y": 1.11, "label": "Legacy 8U"}]};
+const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const grid = dark ? '#3a3a3a' : '#e3e3e3';
+const tick = dark ? '#d7dee8' : '#444';
+Chart.register(ChartDataLabels);
+
+// --- Power rankings (horizontal bars) ---
+new Chart(document.getElementById('powerChart'), {
+  type: 'bar',
+  data: { labels: POWER.labels,
+    datasets: [{ label: 'Power (runs vs avg)', data: POWER.values,
+      backgroundColor: POWER.colors, borderRadius: 4 }] },
+  options: { indexAxis: 'y', responsive: true,
+    plugins: { legend: { display: false },
+      title: { display: true, text: 'Power rankings (Massey, runs vs. average)', color: tick },
+      datalabels: { anchor: 'end', align: 'end', color: tick,
+        formatter: v => (v >= 0 ? '+' : '') + v.toFixed(1) } },
+    scales: { x: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'runs vs. average', color: tick } },
+      y: { grid: { display: false }, ticks: { color: tick } } } }
+});
+
+// --- Offense vs Defense quadrant scatter ---
+const mkPts = (arr, c) => ({ data: arr, backgroundColor: c, pointRadius: 7,
+  pointHoverRadius: 9 });
+// guideline plugin: draw axes at 0,0 to split the four quadrants
+const quad = { id: 'quad', beforeDraw(c) {
+  const {ctx, chartArea: a, scales} = c;
+  const x0 = scales.x.getPixelForValue(0), y0 = scales.y.getPixelForValue(0);
+  ctx.save(); ctx.strokeStyle = dark ? '#555' : '#bbb'; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(x0, a.top); ctx.lineTo(x0, a.bottom);
+  ctx.moveTo(a.left, y0); ctx.lineTo(a.right, y0); ctx.stroke(); ctx.restore();
+} };
+new Chart(document.getElementById('offDefChart'), {
+  type: 'scatter',
+  data: { datasets: [
+    Object.assign(mkPts(OFFDEF.You, '#ff6b00'), { label: 'You' }),
+    Object.assign(mkPts(OFFDEF.Opponents, '#0d9488'), { label: 'Opponents' }),
+    Object.assign(mkPts(OFFDEF.Other, '#9ca3af'), { label: 'Other seeds' }),
+  ] },
+  plugins: [quad],
+  options: { responsive: true,
+    plugins: { legend: { labels: { color: tick } },
+      title: { display: true, text: 'Offense vs. Defense (top-right = strong both sides)', color: tick },
+      datalabels: { align: 'right', offset: 6, color: tick, font: { size: 10 },
+        formatter: (v, ctx) => ctx.dataset.data[ctx.dataIndex].label },
+      tooltip: { callbacks: { label: c => `${c.raw.label}: off ${c.raw.x}, def ${c.raw.y}` } } },
+    scales: {
+      x: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'Offense  →  scores more', color: tick } },
+      y: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'Defense  →  allows fewer', color: tick } } } }
+});
+</script>
+<script>
+const GC = {"me": "mischiefs c", "mu": 4.777, "sigma": 3.6, "def0": "slammers comp", "teams": {"mischiefs c": {"d": "8U Mischiefs C 8U", "seed": 1, "gp": 22, "wp": 0.477, "am": 1.09, "ma": 3.98, "elo": 1554, "off": 2.27, "def": 1.56, "rs": 5.5, "ra": 4.4, "sos": 2.85, "l5": "3-2", "rec": "9-11-1"}, "foster city": {"d": "Foster city", "seed": 0, "gp": 1, "wp": 0.0, "am": -3.0, "ma": 1.37, "elo": 1483, "off": -0.62, "def": 1.76, "rs": 2.0, "ra": 5.0, "sos": 3.98, "l5": "0-1", "rec": "0-1-0"}, "hmb waves black": {"d": "HMB Waves - Black 8U", "seed": 0, "gp": 13, "wp": 0.5, "am": -0.77, "ma": 4.2, "elo": 1481, "off": 1.83, "def": 2.22, "rs": 3.6, "ra": 4.4, "sos": 5.03, "l5": "3-1", "rec": "6-6-1"}, "slammers comp": {"d": "8u Slammers Comp", "seed": 1, "gp": 22, "wp": 0.455, "am": -1.41, "ma": 2.64, "elo": 1443, "off": 1.85, "def": 0.64, "rs": 4.1, "ra": 5.5, "sos": 4.2, "l5": "2-3", "rec": "9-9-0"}, "rebels black mckeon": {"d": "Rebels Black - McKeon 8U", "seed": 1, "gp": 24, "wp": 0.792, "am": 2.04, "ma": 6.11, "elo": 1678, "off": 2.43, "def": 3.53, "rs": 4.7, "ra": 2.7, "sos": 4.0, "l5": "5-0", "rec": "15-3-2"}, "san bruno storm 8c junio": {"d": "San Bruno Storm 8C - Junio", "seed": 1, "gp": 18, "wp": 0.694, "am": 1.5, "ma": 7.09, "elo": 1598, "off": 2.1, "def": 4.83, "rs": 3.9, "ra": 2.4, "sos": 5.74, "l5": "3-1", "rec": "7-4-2"}, "redhawks red": {"d": "Redhawks 8U Red", "seed": 1, "gp": 19, "wp": 0.132, "am": -5.05, "ma": -0.02, "elo": 1328, "off": 0.68, "def": -0.82, "rs": 2.6, "ra": 7.7, "sos": 5.17, "l5": "0-5", "rec": "2-13-1"}, "force comp": {"d": "Force 8U Comp", "seed": 1, "gp": 24, "wp": 0.604, "am": 2.58, "ma": 7.94, "elo": 1623, "off": 3.95, "def": 3.83, "rs": 5.4, "ra": 2.8, "sos": 5.21, "l5": "4-1", "rec": "12-8-0"}, "wvslammers red summer all stars": {"d": "WVSlammers 8U Red Summer All Stars", "seed": 1, "gp": 21, "wp": 0.857, "am": 5.24, "ma": 8.35, "elo": 1740, "off": 3.94, "def": 4.28, "rs": 7.0, "ra": 1.8, "sos": 3.27, "l5": "5-0", "rec": "17-3-0"}, "alameda blaze": {"d": "Alameda blaze", "seed": 0, "gp": 2, "wp": 0.0, "am": -9.0, "ma": -2.22, "elo": 1447, "off": -0.79, "def": -1.5, "rs": 0.5, "ra": 9.5, "sos": 6.16, "l5": "0-2", "rec": "0-2-0"}, "woodland all stars 2026 green": {"d": "Woodland 8U All Stars 2026-Green", "seed": 0, "gp": 1, "wp": 1.0, "am": 1.0, "ma": 4.09, "elo": 1509, "off": 0.68, "def": 3.06, "rs": 4.0, "ra": 3.0, "sos": 3.98, "l5": "1-0", "rec": "1-0-0"}, "roseville thunder all stars red": {"d": "Roseville Thunder All-Stars Red 8U", "seed": 0, "gp": 1, "wp": 1.0, "am": 12.0, "ma": 14.18, "elo": 1531, "off": 8.44, "def": 4.78, "rs": 13.0, "ra": 1.0, "sos": 3.98, "l5": "1-0", "rec": "1-0-0"}, "pocket all stars": {"d": "Pocket 8u All-Stars", "seed": 0, "gp": 1, "wp": 0.0, "am": -10.0, "ma": -6.0, "elo": 1469, "off": -2.77, "def": -2.98, "rs": 0.0, "ra": 10.0, "sos": 3.98, "l5": "0-1", "rec": "0-1-0"}, "elk grove elite all stars": {"d": "Elk Grove Elite 8U All Stars", "seed": 0, "gp": 1, "wp": 0.0, "am": -6.0, "ma": -2.33, "elo": 1477, "off": -1.05, "def": -1.25, "rs": 2.0, "ra": 8.0, "sos": 3.98, "l5": "0-1", "rec": "0-1-0"}, "steal breeze fahy": {"d": "Steal Breeze Fahy 8U", "seed": 1, "gp": 12, "wp": 0.542, "am": 0.08, "ma": -0.1, "elo": 1517, "off": -0.15, "def": 0.09, "rs": 4.8, "ra": 4.8, "sos": 0.07, "l5": "3-2", "rec": "6-3-1"}, "novato heat red": {"d": "Novato Heat Red 8U", "seed": 0, "gp": 1, "wp": 0.0, "am": -4.0, "ma": -0.5, "elo": 1483, "off": -0.18, "def": -0.39, "rs": 3.0, "ra": 7.0, "sos": 3.98, "l5": "0-1", "rec": "0-1-0"}, "west county wildcats": {"d": "West County Wildcats 8U", "seed": 0, "gp": 3, "wp": 0.333, "am": -5.33, "ma": -2.24, "elo": 1472, "off": -0.73, "def": -1.48, "rs": 3.3, "ra": 8.7, "sos": 3.2, "l5": "1-2", "rec": "1-2-0"}, "8c burlingame flames 2026": {"d": "8C Burlingame Flames 2026 8U", "seed": 1, "gp": 26, "wp": 0.423, "am": -0.58, "ma": 4.4, "elo": 1518, "off": 3.49, "def": 0.77, "rs": 5.5, "ra": 6.1, "sos": 4.87, "l5": "3-2", "rec": "10-13-0"}, "alameda blaze sullivan": {"d": "Alameda Blaze - Sullivan 8U", "seed": 0, "gp": 1, "wp": 1.0, "am": 8.0, "ma": 10.23, "elo": 1527, "off": 3.76, "def": 5.71, "rs": 8.0, "ra": 0.0, "sos": 2.64, "l5": "1-0", "rec": "1-0-0"}, "milpitas as 2026": {"d": "Milpitas 8u AS 2026", "seed": 1, "gp": 10, "wp": 0.45, "am": -1.3, "ma": -1.32, "elo": 1464, "off": -1.68, "def": 0.36, "rs": 2.8, "ra": 4.1, "sos": -0.04, "l5": "4-1", "rec": "4-5-0"}, "livermore smoke summer 26": {"d": "Livermore Smoke 8U - Summer 26\u2019", "seed": 1, "gp": 14, "wp": 0.464, "am": 0.14, "ma": 3.77, "elo": 1520, "off": 0.26, "def": 3.36, "rs": 3.7, "ra": 3.6, "sos": 3.51, "l5": "4-1", "rec": "6-6-1"}, "tremors black": {"d": "Tremors Black 8U", "seed": 0, "gp": 6, "wp": 0.167, "am": -3.5, "ma": -0.21, "elo": 1441, "off": -0.55, "def": 0.25, "rs": 2.7, "ra": 6.2, "sos": 3.46, "l5": "1-4", "rec": "1-5-0"}, "outlaws carmichael": {"d": "Outlaws Carmichael 8U", "seed": 0, "gp": 6, "wp": 0.0, "am": -6.67, "ma": -4.19, "elo": 1396, "off": -2.55, "def": -1.62, "rs": 0.8, "ra": 7.5, "sos": 2.59, "l5": "0-5", "rec": "0-6-0"}, "redwood city wicked 8c cho": {"d": "Redwood City Wicked 8C - Cho", "seed": 1, "gp": 25, "wp": 0.84, "am": 4.36, "ma": 9.21, "elo": 1717, "off": 3.7, "def": 5.35, "rs": 6.0, "ra": 1.7, "sos": 4.9, "l5": "4-1", "rec": "18-3-2"}, "wicked purple": {"d": "Wicked Purple 8U", "seed": 1, "gp": 14, "wp": 0.857, "am": 5.79, "ma": 5.84, "elo": 1682, "off": 2.9, "def": 2.92, "rs": 7.5, "ra": 1.7, "sos": -0.35, "l5": "4-1", "rec": "9-1-0"}, "santa rosa red barons red": {"d": "Santa Rosa Red Barons 8U Red", "seed": 0, "gp": 7, "wp": 0.286, "am": -1.57, "ma": 0.13, "elo": 1465, "off": -0.26, "def": 0.43, "rs": 4.0, "ra": 5.6, "sos": 1.63, "l5": "2-3", "rec": "2-5-0"}, "campbell crush": {"d": "Campbell Crush 8U", "seed": 0, "gp": 7, "wp": 0.143, "am": -5.71, "ma": -4.24, "elo": 1396, "off": -1.64, "def": -2.53, "rs": 2.0, "ra": 7.7, "sos": 1.5, "l5": "0-4", "rec": "0-5-2"}, "srvgal stompers elite valdivia": {"d": "SRVGAL Stompers Elite 8U-Valdivia", "seed": 1, "gp": 10, "wp": 0.7, "am": 3.6, "ma": 4.92, "elo": 1588, "off": 1.11, "def": 3.75, "rs": 5.3, "ra": 1.7, "sos": 1.47, "l5": "3-2", "rec": "7-3-0"}, "windsor wicked gray": {"d": "Windsor Wicked Gray 8U", "seed": 1, "gp": 13, "wp": 0.308, "am": -0.62, "ma": -1.99, "elo": 1447, "off": 0.53, "def": -2.42, "rs": 5.9, "ra": 6.5, "sos": -1.51, "l5": "1-4", "rec": "3-6-0"}, "novato heat castellucci": {"d": "Novato Heat Castellucci 8U", "seed": 0, "gp": 4, "wp": 0.5, "am": -2.25, "ma": -2.02, "elo": 1492, "off": 0.37, "def": -2.3, "rs": 5.5, "ra": 7.8, "sos": 0.44, "l5": "2-2", "rec": "2-2-0"}, "tremors gold": {"d": "Tremors 8U Gold", "seed": 0, "gp": 3, "wp": 0.0, "am": -9.0, "ma": -4.48, "elo": 1441, "off": -2.14, "def": -2.3, "rs": 0.0, "ra": 9.0, "sos": 4.55, "l5": "0-3", "rec": "0-3-0"}, "revolution": {"d": "Revolution 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -10.5, "ma": -7.3, "elo": 1456, "off": -2.34, "def": -4.72, "rs": 0.5, "ra": 11.0, "sos": 2.87, "l5": "0-2", "rec": "0-2-0"}, "foster city flash": {"d": "Foster City Flash 8U", "seed": 1, "gp": 23, "wp": 0.5, "am": 0.83, "ma": 1.72, "elo": 1554, "off": 1.07, "def": 0.63, "rs": 4.9, "ra": 4.1, "sos": 0.83, "l5": "3-2", "rec": "12-5-3"}, "vacaville all stars": {"d": "Vacaville All Stars 8U", "seed": 1, "gp": 10, "wp": 0.6, "am": 1.0, "ma": -0.79, "elo": 1518, "off": 2.31, "def": -3.03, "rs": 8.1, "ra": 7.1, "sos": -1.7, "l5": "2-3", "rec": "6-4-0"}, "millbrae mischief 8c": {"d": "Millbrae Mischief 8C", "seed": 0, "gp": 1, "wp": 0.0, "am": -3.0, "ma": 0.81, "elo": 1483, "off": 1.72, "def": -1.07, "rs": 6.0, "ra": 9.0, "sos": 4.4, "l5": "0-1", "rec": "0-1-0"}, "phba panthers red mclennan": {"d": "PHBA Panthers 8u Red - McLennan 8U", "seed": 1, "gp": 4, "wp": 0.5, "am": 1.0, "ma": -0.22, "elo": 1513, "off": 2.81, "def": -2.97, "rs": 8.0, "ra": 7.0, "sos": -0.97, "l5": "2-2", "rec": "2-2-0"}, "santa cruz crushers": {"d": "Santa Cruz Crushers 8U", "seed": 0, "gp": 7, "wp": 0.286, "am": -0.71, "ma": 0.46, "elo": 1474, "off": -1.62, "def": 2.13, "rs": 3.0, "ra": 3.7, "sos": 1.4, "l5": "1-4", "rec": "2-5-0"}, "almaden lightning": {"d": "Almaden Lightning 8U", "seed": 1, "gp": 14, "wp": 0.786, "am": 3.64, "ma": 3.03, "elo": 1640, "off": 2.1, "def": 0.97, "rs": 6.4, "ra": 2.8, "sos": -0.45, "l5": "5-0", "rec": "8-1-0"}, "west valley slammers blue": {"d": "West Valley Slammers Blue 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -5.0, "ma": -1.89, "elo": 1466, "off": -2.83, "def": 1.04, "rs": 0.5, "ra": 5.5, "sos": 3.03, "l5": "0-2", "rec": "0-2-0"}, "west valley slammers 8c": {"d": "West Valley Slammers 8C", "seed": 0, "gp": 1, "wp": 1.0, "am": 9.0, "ma": 11.51, "elo": 1532, "off": 7.49, "def": 3.34, "rs": 12.0, "ra": 3.0, "sos": 3.03, "l5": "1-0", "rec": "1-0-0"}, "scotts valley trouble": {"d": "Scotts Valley Trouble 8U", "seed": 0, "gp": 1, "wp": 0.0, "am": -8.0, "ma": -5.03, "elo": 1472, "off": -3.29, "def": -1.4, "rs": 0.0, "ra": 8.0, "sos": 3.03, "l5": "0-1", "rec": "0-1-0"}, "sunnyvale shockwave": {"d": "Sunnyvale Shockwave 8U", "seed": 0, "gp": 3, "wp": 0.0, "am": -4.67, "ma": -3.9, "elo": 1450, "off": 0.18, "def": -3.94, "rs": 6.3, "ra": 11.0, "sos": 0.48, "l5": "0-3", "rec": "0-3-0"}, "moutain dream": {"d": "Moutain Dream 8U", "seed": 0, "gp": 1, "wp": 0.0, "am": -6.0, "ma": -2.25, "elo": 1481, "off": -1.99, "def": -0.11, "rs": 1.0, "ra": 7.0, "sos": 3.03, "l5": "0-1", "rec": "0-1-0"}, "slammers rec": {"d": "Slammers Rec 8U", "seed": 0, "gp": 1, "wp": 0.0, "am": -9.0, "ma": -5.95, "elo": 1480, "off": -3.29, "def": -2.26, "rs": 0.0, "ra": 9.0, "sos": 3.03, "l5": "0-1", "rec": "0-1-0"}, "hmb waves orange": {"d": "HMB Waves - Orange 8U", "seed": 0, "gp": 3, "wp": 0.167, "am": -2.0, "ma": 2.67, "elo": 1475, "off": -1.39, "def": 3.94, "rs": 1.0, "ra": 3.0, "sos": 4.23, "l5": "0-2", "rec": "0-2-1"}, "8r livermore smoke cox": {"d": "8R Livermore Smoke- Cox", "seed": 0, "gp": 2, "wp": 0.5, "am": 0.0, "ma": 1.03, "elo": 1503, "off": -0.91, "def": 1.98, "rs": 3.5, "ra": 3.5, "sos": 1.07, "l5": "1-1", "rec": "1-1-0"}, "petaluma steal breeze": {"d": "Petaluma Steal Breeze 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -7.5, "ma": -9.58, "elo": 1446, "off": -5.74, "def": -3.42, "rs": 1.0, "ra": 8.5, "sos": -1.99, "l5": "0-2", "rec": "0-2-0"}, "napa valley legacy": {"d": "Napa Valley Legacy 8U", "seed": 0, "gp": 1, "wp": 1.0, "am": 1.0, "ma": -0.44, "elo": 1509, "off": 1.12, "def": -1.46, "rs": 8.0, "ra": 7.0, "sos": -1.99, "l5": "1-0", "rec": "1-0-0"}, "kinghts heffley": {"d": "Kinghts 8U Heffley", "seed": 0, "gp": 3, "wp": 0.0, "am": -13.33, "ma": -5.84, "elo": 1443, "off": 0.17, "def": -5.99, "rs": 0.3, "ra": 13.7, "sos": 7.49, "l5": "0-3", "rec": "0-3-0"}, "wv slammers blue hernandez": {"d": "WV Slammers Blue 8U-Hernandez", "seed": 1, "gp": 19, "wp": 0.579, "am": 0.95, "ma": -0.88, "elo": 1541, "off": 0.12, "def": -0.87, "rs": 4.3, "ra": 3.4, "sos": -1.86, "l5": "3-2", "rec": "9-9-0"}, "sj twisters lopez": {"d": "SJ Twisters- Lopez 8U", "seed": 0, "gp": 3, "wp": 0.0, "am": -6.0, "ma": -5.17, "elo": 1433, "off": -2.35, "def": -2.66, "rs": 2.0, "ra": 8.0, "sos": 0.85, "l5": "0-3", "rec": "0-3-0"}, "west valley slammers white": {"d": "West Valley Slammers 8U White", "seed": 0, "gp": 1, "wp": 0.0, "am": -5.0, "ma": -5.87, "elo": 1480, "off": -2.28, "def": -3.11, "rs": 3.0, "ra": 8.0, "sos": -0.88, "l5": "0-1", "rec": "0-1-0"}, "san bruno storm 8r mcgrew renteria": {"d": "San Bruno Storm 8R - McGrew/Renteria", "seed": 0, "gp": 1, "wp": 0.0, "am": -1.0, "ma": -2.2, "elo": 1492, "off": -2.28, "def": 0.34, "rs": 3.0, "ra": 4.0, "sos": -0.88, "l5": "0-1", "rec": "0-1-0"}, "belmont blast 8 rec 2026": {"d": "Belmont Blast 8 Rec (2026)", "seed": 0, "gp": 2, "wp": 0.75, "am": 2.0, "ma": 2.31, "elo": 1521, "off": -1.52, "def": 3.82, "rs": 3.0, "ra": 1.0, "sos": 0.42, "l5": "1-0", "rec": "1-0-1"}, "wicked rec": {"d": "Wicked 8u Rec 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -9.5, "ma": -9.89, "elo": 1448, "off": -5.07, "def": -4.41, "rs": 1.0, "ra": 10.5, "sos": -0.84, "l5": "0-2", "rec": "0-2-0"}, "redhawks white": {"d": "Redhawks White 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -6.0, "ma": -4.85, "elo": 1452, "off": -3.14, "def": -1.51, "rs": 1.0, "ra": 7.0, "sos": 0.42, "l5": "0-2", "rec": "0-2-0"}, "magic black tam": {"d": "Magic Black (Tam) \ud83e\ude84\ud83e\udd4e\ud83d\udcaa 8U", "seed": 0, "gp": 3, "wp": 0.333, "am": -1.0, "ma": -1.82, "elo": 1491, "off": -2.38, "def": 0.66, "rs": 2.0, "ra": 3.0, "sos": -0.7, "l5": "1-2", "rec": "1-2-0"}, "blaze sullivan": {"d": "Blaze 8u Sullivan 8U", "seed": 1, "gp": 11, "wp": 0.545, "am": -0.45, "ma": 0.1, "elo": 1506, "off": -0.69, "def": 0.81, "rs": 3.4, "ra": 3.8, "sos": 0.23, "l5": "4-1", "rec": "6-4-0"}, "morgan hill mayhem": {"d": "Morgan Hill Mayhem", "seed": 0, "gp": 3, "wp": 0.333, "am": -2.67, "ma": -3.44, "elo": 1465, "off": -2.38, "def": -0.92, "rs": 2.0, "ra": 4.7, "sos": -0.7, "l5": "1-2", "rec": "1-2-0"}, "phba panthers black lopez": {"d": "PHBA Panthers 8u Black - Lopez 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -3.0, "ma": -3.71, "elo": 1472, "off": -4.53, "def": 1.06, "rs": 0.5, "ra": 3.5, "sos": -0.88, "l5": "0-2", "rec": "0-2-0"}, "pg riptide red": {"d": "PG Riptide 8U Red", "seed": 0, "gp": 1, "wp": 0.0, "am": -4.0, "ma": -4.05, "elo": 1480, "off": -2.56, "def": -1.22, "rs": 1.0, "ra": 5.0, "sos": 0.1, "l5": "0-1", "rec": "0-1-0"}, "select burlingame sal": {"d": "Select 8u Burlingame Sal 8U", "seed": 0, "gp": 1, "wp": 1.0, "am": 2.0, "ma": 2.94, "elo": 1513, "off": 3.32, "def": -0.56, "rs": 8.0, "ra": 6.0, "sos": 1.72, "l5": "1-0", "rec": "1-0-0"}, "force summer 2026 ford": {"d": "Force Summer 2026-Ford 8U", "seed": 0, "gp": 3, "wp": 1.0, "am": 6.67, "ma": 8.31, "elo": 1566, "off": 3.97, "def": 4.13, "rs": 8.0, "ra": 1.3, "sos": 1.72, "l5": "3-0", "rec": "3-0-0"}, "belmont blast": {"d": "Belmont Blast 8U", "seed": 0, "gp": 1, "wp": 1.0, "am": 3.0, "ma": 3.86, "elo": 1514, "off": -0.99, "def": 4.61, "rs": 3.0, "ra": 0.0, "sos": 1.72, "l5": "1-0", "rec": "1-0-0"}, "pgsl sirens": {"d": "PGSL Sirens 8U", "seed": 0, "gp": 1, "wp": 0.5, "am": 0.0, "ma": 1.1, "elo": 1500, "off": -2.71, "def": 3.75, "rs": 1.0, "ra": 1.0, "sos": 1.72, "l5": "0-0", "rec": "0-0-1"}, "millbrae mini mischief": {"d": "Millbrae Mini Mischief", "seed": 0, "gp": 1, "wp": 0.0, "am": -10.0, "ma": -7.12, "elo": 1467, "off": -3.14, "def": -3.58, "rs": 0.0, "ra": 10.0, "sos": 1.72, "l5": "0-1", "rec": "0-1-0"}, "pgsl sirens all stars": {"d": "PGSL SIRENS ALL STARS - 8U", "seed": 0, "gp": 5, "wp": 0.4, "am": -1.2, "ma": 1.71, "elo": 1483, "off": -1.83, "def": 3.48, "rs": 2.2, "ra": 3.4, "sos": 2.84, "l5": "2-3", "rec": "2-3-0"}, "8rec flames": {"d": "8Rec Flames", "seed": 0, "gp": 1, "wp": 0.0, "am": -11.0, "ma": -8.99, "elo": 1469, "off": -3.57, "def": -4.87, "rs": 0.0, "ra": 11.0, "sos": 1.72, "l5": "0-1", "rec": "0-1-0"}, "rebels teal lorenz": {"d": "Rebels Teal Lorenz 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -9.0, "ma": -5.12, "elo": 1450, "off": -1.48, "def": -3.5, "rs": 0.5, "ra": 9.5, "sos": 3.65, "l5": "0-2", "rec": "0-2-0"}, "legacy": {"d": "Legacy 8U", "seed": 1, "gp": 4, "wp": 0.75, "am": 2.75, "ma": 2.38, "elo": 1530, "off": 1.27, "def": 1.11, "rs": 6.2, "ra": 3.5, "sos": -0.57, "l5": "3-1", "rec": "3-1-0"}, "livermore smoke 10uc cruz": {"d": "Livermore Smoke 10UC- Cruz", "seed": 0, "gp": 1, "wp": 1.0, "am": 4.0, "ma": 7.61, "elo": 1519, "off": 11.28, "def": -4.28, "rs": 14.0, "ra": 10.0, "sos": 3.77, "l5": "1-0", "rec": "1-0-0"}, "san lorenzo heat": {"d": "San Lorenzo Heat", "seed": 0, "gp": 2, "wp": 0.0, "am": -6.0, "ma": -3.82, "elo": 1459, "off": 0.36, "def": -4.11, "rs": 4.5, "ra": 10.5, "sos": 1.49, "l5": "0-2", "rec": "0-2-0"}, "lady patriots": {"d": "Lady Patriots 8U 8U", "seed": 0, "gp": 2, "wp": 0.0, "am": -8.5, "ma": -6.71, "elo": 1447, "off": -2.19, "def": -4.34, "rs": 2.0, "ra": 10.5, "sos": 1.49, "l5": "0-2", "rec": "0-2-0"}, "marin tremors": {"d": "Marin Tremors 8u", "seed": 0, "gp": 1, "wp": 0.0, "am": -8.0, "ma": -1.31, "elo": 1479, "off": 0.04, "def": -1.4, "rs": 0.0, "ra": 8.0, "sos": 7.09, "l5": "0-1", "rec": "0-1-0"}}, "games": [["mischiefs c", "foster city", 5, 2, "2026-05-16"], ["mischiefs c", "hmb waves black", 10, 12, "2026-05-17"], ["mischiefs c", "slammers comp", 4, 5, "2026-05-23"], ["mischiefs c", "rebels black mckeon", 3, 4, "2026-05-23"], ["mischiefs c", "san bruno storm 8c junio", 2, 3, "2026-05-23"], ["mischiefs c", "redhawks red", 4, 1, "2026-05-24"], ["mischiefs c", "force comp", 3, 8, "2026-05-24"], ["mischiefs c", "redhawks red", 3, 3, "2026-05-30"], ["mischiefs c", "wvslammers red summer all stars", 5, 6, "2026-05-30"], ["mischiefs c", "alameda blaze", 8, 1, "2026-05-30"], ["mischiefs c", "woodland all stars 2026 green", 3, 4, "2026-06-06"], ["mischiefs c", "roseville thunder all stars red", 1, 13, "2026-06-06"], ["mischiefs c", "pocket all stars", 10, 0, "2026-06-07"], ["mischiefs c", "elk grove elite all stars", 8, 2, "2026-06-07"], ["mischiefs c", "force comp", 0, 9, "2026-06-20"], ["mischiefs c", "steal breeze fahy", 10, 0, "2026-06-20"], ["mischiefs c", "novato heat red", 7, 3, "2026-06-21"], ["mischiefs c", "west county wildcats", 14, 4, "2026-06-21"], ["mischiefs c", "8c burlingame flames 2026", 6, 10, "2026-06-25"], ["slammers comp", "san bruno storm 8c junio", 2, 4, "2026-05-23"], ["slammers comp", "rebels black mckeon", 0, 7, "2026-05-23"], ["slammers comp", "8c burlingame flames 2026", 8, 6, "2026-05-24"], ["slammers comp", "force comp", 9, 8, "2026-05-24"], ["slammers comp", "8c burlingame flames 2026", 9, 4, "2026-05-30"], ["slammers comp", "alameda blaze sullivan", 0, 8, "2026-05-30"], ["slammers comp", "redhawks red", 12, 0, "2026-05-30"], ["slammers comp", "wvslammers red summer all stars", 1, 11, "2026-05-31"], ["slammers comp", "milpitas as 2026", 8, 0, "2026-06-06"], ["slammers comp", "livermore smoke summer 26", 0, 5, "2026-06-06"], ["slammers comp", "rebels black mckeon", 3, 14, "2026-06-06"], ["slammers comp", "tremors black", 8, 0, "2026-06-07"], ["slammers comp", "livermore smoke summer 26", 2, 3, "2026-06-07"], ["slammers comp", "outlaws carmichael", 2, 1, "2026-06-20"], ["slammers comp", "wvslammers red summer all stars", 1, 7, "2026-06-20"], ["slammers comp", "livermore smoke summer 26", 0, 2, "2026-06-21"], ["slammers comp", "8c burlingame flames 2026", 7, 6, "2026-06-21"], ["slammers comp", "redwood city wicked 8c cho", 1, 12, "2026-06-25"], ["wicked purple", "rebels black mckeon", 4, 5, "2026-05-21"], ["wicked purple", "santa rosa red barons red", 5, 0, "2026-05-30"], ["wicked purple", "steal breeze fahy", 5, 0, "2026-05-30"], ["wicked purple", "campbell crush", 12, 0, "2026-05-30"], ["wicked purple", "santa rosa red barons red", 6, 1, "2026-05-31"], ["wicked purple", "srvgal stompers elite valdivia", 3, 1, "2026-05-31"], ["wicked purple", "windsor wicked gray", 11, 4, "2026-06-13"], ["wicked purple", "santa rosa red barons red", 7, 2, "2026-06-13"], ["wicked purple", "novato heat castellucci", 12, 2, "2026-06-13"], ["wicked purple", "tremors gold", 10, 0, "2026-06-19"], ["wicked purple", "west county wildcats", 7, 0, "2026-06-19"], ["wicked purple", "revolution", 10, 0, "2026-06-20"], ["wicked purple", "steal breeze fahy", 8, 1, "2026-06-21"], ["wicked purple", "rebels black mckeon", 5, 8, "2026-06-22"], ["8c burlingame flames 2026", "foster city flash", 8, 6, "2026-05-16"], ["8c burlingame flames 2026", "redwood city wicked 8c cho", 2, 6, "2026-05-17"], ["8c burlingame flames 2026", "redwood city wicked 8c cho", 8, 9, "2026-05-17"], ["8c burlingame flames 2026", "san bruno storm 8c junio", 2, 8, "2026-05-21"], ["8c burlingame flames 2026", "force comp", 3, 10, "2026-05-23"], ["8c burlingame flames 2026", "hmb waves black", 4, 3, "2026-05-23"], ["8c burlingame flames 2026", "redwood city wicked 8c cho", 1, 3, "2026-05-23"], ["8c burlingame flames 2026", "wvslammers red summer all stars", 7, 2, "2026-05-30"], ["8c burlingame flames 2026", "redhawks red", 7, 6, "2026-05-31"], ["8c burlingame flames 2026", "force comp", 3, 9, "2026-06-01"], ["8c burlingame flames 2026", "redwood city wicked 8c cho", 4, 7, "2026-06-06"], ["8c burlingame flames 2026", "milpitas as 2026", 8, 0, "2026-06-06"], ["8c burlingame flames 2026", "livermore smoke summer 26", 6, 0, "2026-06-06"], ["8c burlingame flames 2026", "redhawks red", 3, 2, "2026-06-07"], ["8c burlingame flames 2026", "rebels black mckeon", 1, 2, "2026-06-07"], ["8c burlingame flames 2026", "san bruno storm 8c junio", 8, 10, "2026-06-13"], ["8c burlingame flames 2026", "foster city flash", 8, 5, "2026-06-20"], ["8c burlingame flames 2026", "vacaville all stars", 12, 6, "2026-06-20"], ["8c burlingame flames 2026", "wvslammers red summer all stars", 2, 8, "2026-06-21"], ["8c burlingame flames 2026", "millbrae mischief 8c", 9, 6, "2026-06-25"], ["phba panthers red mclennan", "steal breeze fahy", 7, 8, "2026-06-20"], ["phba panthers red mclennan", "windsor wicked gray", 12, 10, "2026-06-20"], ["phba panthers red mclennan", "santa cruz crushers", 8, 4, "2026-06-20"], ["phba panthers red mclennan", "west county wildcats", 5, 6, "2026-06-21"], ["almaden lightning", "west valley slammers blue", 8, 0, "2026-05-27"], ["almaden lightning", "west valley slammers 8c", 3, 12, "2026-06-05"], ["almaden lightning", "santa cruz crushers", 3, 6, "2026-06-06"], ["almaden lightning", "scotts valley trouble", 8, 0, "2026-06-06"], ["almaden lightning", "sunnyvale shockwave", 12, 3, "2026-06-06"], ["almaden lightning", "campbell crush", 10, 0, "2026-06-07"], ["almaden lightning", "moutain dream", 7, 1, "2026-06-07"], ["almaden lightning", "campbell crush", 11, 3, "2026-06-11"], ["almaden lightning", "slammers rec", 9, 0, "2026-06-20"], ["almaden lightning", "hmb waves orange", 3, 0, "2026-06-20"], ["almaden lightning", "west valley slammers blue", 3, 1, "2026-06-21"], ["almaden lightning", "8r livermore smoke cox", 2, 1, "2026-06-21"], ["windsor wicked gray", "petaluma steal breeze", 7, 0, "2026-05-30"], ["windsor wicked gray", "napa valley legacy", 7, 8, "2026-05-30"], ["windsor wicked gray", "outlaws carmichael", 7, 3, "2026-05-30"], ["windsor wicked gray", "santa rosa red barons red", 0, 9, "2026-05-31"], ["windsor wicked gray", "novato heat castellucci", 4, 5, "2026-06-13"], ["windsor wicked gray", "santa rosa red barons red", 14, 6, "2026-06-13"], ["windsor wicked gray", "tremors black", 3, 6, "2026-06-19"], ["windsor wicked gray", "santa rosa red barons red", 3, 7, "2026-06-19"], ["windsor wicked gray", "petaluma steal breeze", 10, 2, "2026-06-21"], ["windsor wicked gray", "novato heat castellucci", 1, 8, "2026-06-21"], ["redwood city wicked 8c cho", "force comp", 1, 0, "2026-05-22"], ["redwood city wicked 8c cho", "redhawks red", 11, 0, "2026-05-24"], ["redwood city wicked 8c cho", "wvslammers red summer all stars", 1, 0, "2026-05-24"], ["redwood city wicked 8c cho", "san bruno storm 8c junio", 3, 2, "2026-05-25"], ["redwood city wicked 8c cho", "hmb waves black", 13, 2, "2026-05-30"], ["redwood city wicked 8c cho", "rebels black mckeon", 5, 1, "2026-05-30"], ["redwood city wicked 8c cho", "livermore smoke summer 26", 6, 0, "2026-05-30"], ["redwood city wicked 8c cho", "force comp", 6, 5, "2026-05-31"], ["redwood city wicked 8c cho", "wvslammers red summer all stars", 1, 4, "2026-05-31"], ["redwood city wicked 8c cho", "san bruno storm 8c junio", 0, 0, "2026-06-06"], ["redwood city wicked 8c cho", "force comp", 5, 2, "2026-06-06"], ["redwood city wicked 8c cho", "force comp", 3, 1, "2026-06-07"], ["redwood city wicked 8c cho", "rebels black mckeon", 3, 4, "2026-06-07"], ["redwood city wicked 8c cho", "redhawks red", 14, 0, "2026-06-13"], ["redwood city wicked 8c cho", "kinghts heffley", 13, 1, "2026-06-13"], ["redwood city wicked 8c cho", "hmb waves black", 0, 0, "2026-06-13"], ["redwood city wicked 8c cho", "force comp", 8, 0, "2026-06-14"], ["redwood city wicked 8c cho", "wvslammers red summer all stars", 1, 4, "2026-06-14"], ["wv slammers blue hernandez", "sj twisters lopez", 11, 3, "2026-05-14"], ["wv slammers blue hernandez", "santa cruz crushers", 1, 3, "2026-05-16"], ["wv slammers blue hernandez", "santa cruz crushers", 8, 6, "2026-05-16"], ["wv slammers blue hernandez", "west valley slammers white", 8, 3, "2026-05-20"], ["wv slammers blue hernandez", "almaden lightning", 0, 8, "2026-05-27"], ["wv slammers blue hernandez", "santa cruz crushers", 2, 0, "2026-05-30"], ["wv slammers blue hernandez", "san bruno storm 8r mcgrew renteria", 4, 3, "2026-05-30"], ["wv slammers blue hernandez", "belmont blast 8 rec 2026", 0, 4, "2026-05-30"], ["wv slammers blue hernandez", "wicked rec", 9, 1, "2026-05-31"], ["wv slammers blue hernandez", "redhawks white", 6, 2, "2026-05-31"], ["wv slammers blue hernandez", "magic black tam", 7, 2, "2026-06-11"], ["wv slammers blue hernandez", "milpitas as 2026", 0, 7, "2026-06-13"], ["wv slammers blue hernandez", "blaze sullivan", 3, 4, "2026-06-13"], ["wv slammers blue hernandez", "morgan hill mayhem", 3, 5, "2026-06-13"], ["wv slammers blue hernandez", "milpitas as 2026", 4, 5, "2026-06-14"], ["wv slammers blue hernandez", "blaze sullivan", 4, 1, "2026-06-20"], ["wv slammers blue hernandez", "8r livermore smoke cox", 5, 6, "2026-06-20"], ["wv slammers blue hernandez", "phba panthers black lopez", 5, 0, "2026-06-21"], ["wv slammers blue hernandez", "phba panthers black lopez", 2, 1, "2026-06-21"], ["wvslammers red summer all stars", "force comp", 5, 4, "2026-05-23"], ["wvslammers red summer all stars", "redhawks red", 6, 2, "2026-05-23"], ["wvslammers red summer all stars", "hmb waves black", 1, 2, "2026-05-23"], ["wvslammers red summer all stars", "hmb waves black", 6, 3, "2026-05-24"], ["wvslammers red summer all stars", "alameda blaze", 11, 0, "2026-05-30"], ["wvslammers red summer all stars", "san bruno storm 8c junio", 8, 2, "2026-05-31"], ["wvslammers red summer all stars", "almaden lightning", 12, 3, "2026-06-05"], ["wvslammers red summer all stars", "kinghts heffley", 15, 0, "2026-06-13"], ["wvslammers red summer all stars", "srvgal stompers elite valdivia", 2, 0, "2026-06-13"], ["wvslammers red summer all stars", "redhawks red", 14, 3, "2026-06-13"], ["wvslammers red summer all stars", "outlaws carmichael", 10, 0, "2026-06-20"], ["blaze sullivan", "wvslammers red summer all stars", 0, 11, "2026-05-30"], ["blaze sullivan", "slammers comp", 8, 0, "2026-05-30"], ["blaze sullivan", "mischiefs c", 1, 8, "2026-05-30"], ["blaze sullivan", "hmb waves black", 0, 7, "2026-05-31"], ["blaze sullivan", "milpitas as 2026", 2, 3, "2026-06-13"], ["blaze sullivan", "morgan hill mayhem", 6, 1, "2026-06-13"], ["blaze sullivan", "pg riptide red", 5, 1, "2026-06-14"], ["blaze sullivan", "campbell crush", 8, 3, "2026-06-14"], ["blaze sullivan", "magic black tam", 2, 1, "2026-06-14"], ["foster city flash", "select burlingame sal", 6, 8, "2026-05-16"], ["foster city flash", "mischiefs c", 2, 5, "2026-05-16"], ["foster city flash", "force summer 2026 ford", 4, 15, "2026-05-17"], ["foster city flash", "redhawks white", 8, 0, "2026-05-23"], ["foster city flash", "belmont blast", 0, 3, "2026-05-23"], ["foster city flash", "pgsl sirens", 1, 1, "2026-05-23"], ["foster city flash", "sj twisters lopez", 4, 0, "2026-05-30"], ["foster city flash", "hmb waves orange", 2, 2, "2026-05-30"], ["foster city flash", "millbrae mini mischief", 10, 0, "2026-05-30"], ["foster city flash", "santa cruz crushers", 3, 2, "2026-05-31"], ["foster city flash", "pgsl sirens all stars", 1, 2, "2026-05-31"], ["foster city flash", "belmont blast 8 rec 2026", 2, 2, "2026-06-06"], ["foster city flash", "tremors gold", 7, 0, "2026-06-07"], ["foster city flash", "force summer 2026 ford", 0, 5, "2026-06-07"], ["foster city flash", "8rec flames", 11, 0, "2026-06-07"], ["foster city flash", "sj twisters lopez", 9, 3, "2026-06-07"], ["foster city flash", "force summer 2026 ford", 0, 4, "2026-06-16"], ["foster city flash", "vacaville all stars", 11, 2, "2026-06-20"], ["foster city flash", "outlaws carmichael", 7, 0, "2026-06-22"], ["srvgal stompers elite valdivia", "outlaws carmichael", 10, 0, "2026-05-30"], ["srvgal stompers elite valdivia", "steal breeze fahy", 3, 1, "2026-05-30"], ["srvgal stompers elite valdivia", "rebels teal lorenz", 10, 1, "2026-05-30"], ["srvgal stompers elite valdivia", "legacy", 7, 0, "2026-05-31"], ["srvgal stompers elite valdivia", "hmb waves black", 7, 3, "2026-06-13"], ["srvgal stompers elite valdivia", "redhawks red", 2, 0, "2026-06-14"], ["srvgal stompers elite valdivia", "kinghts heffley", 13, 0, "2026-06-14"], ["srvgal stompers elite valdivia", "redwood city wicked 8c cho", 0, 7, "2026-06-14"], ["legacy", "rebels teal lorenz", 9, 0, "2026-05-30"], ["legacy", "windsor wicked gray", 8, 7, "2026-05-30"], ["legacy", "steal breeze fahy", 8, 0, "2026-05-30"], ["redhawks red", "hmb waves black", 5, 6, "2026-05-23"], ["redhawks red", "slammers comp", 0, 10, "2026-05-30"], ["redhawks red", "rebels black mckeon", 7, 8, "2026-05-31"], ["redhawks red", "milpitas as 2026", 5, 3, "2026-06-06"], ["redhawks red", "tremors black", 8, 7, "2026-06-07"], ["redhawks red", "force comp", 0, 11, "2026-06-07"], ["redhawks red", "redwood city wicked 8c cho", 0, 13, "2026-06-13"], ["redhawks red", "hmb waves black", 1, 3, "2026-06-14"], ["rebels black mckeon", "san bruno storm 8c junio", 0, 0, "2026-05-23"], ["rebels black mckeon", "san bruno storm 8c junio", 0, 3, "2026-05-23"], ["rebels black mckeon", "livermore smoke summer 26", 2, 2, "2026-05-30"], ["rebels black mckeon", "force comp", 1, 10, "2026-05-30"], ["rebels black mckeon", "redhawks red", 9, 7, "2026-05-31"], ["rebels black mckeon", "mischiefs c", 3, 1, "2026-05-31"], ["rebels black mckeon", "hmb waves black", 4, 0, "2026-05-31"], ["rebels black mckeon", "livermore smoke summer 26", 4, 2, "2026-06-06"], ["rebels black mckeon", "slammers comp", 12, 3, "2026-06-06"], ["rebels black mckeon", "tremors black", 3, 2, "2026-06-06"], ["rebels black mckeon", "tremors black", 5, 0, "2026-06-19"], ["rebels black mckeon", "tremors gold", 10, 0, "2026-06-19"], ["rebels black mckeon", "pgsl sirens all stars", 3, 0, "2026-06-20"], ["rebels black mckeon", "force comp", 4, 0, "2026-06-21"], ["milpitas as 2026", "campbell crush", 4, 4, "2026-05-23"], ["milpitas as 2026", "livermore smoke summer 26", 1, 7, "2026-06-07"], ["milpitas as 2026", "morgan hill mayhem", 5, 0, "2026-06-13"], ["milpitas as 2026", "magic black tam", 0, 3, "2026-06-14"], ["livermore smoke summer 26", "livermore smoke 10uc cruz", 10, 14, "2026-05-26"], ["livermore smoke summer 26", "san bruno storm 8c junio", 1, 5, "2026-05-30"], ["livermore smoke summer 26", "hmb waves black", 0, 5, "2026-05-31"], ["livermore smoke summer 26", "san lorenzo heat", 11, 0, "2026-06-20"], ["livermore smoke summer 26", "lady patriots", 9, 0, "2026-06-20"], ["livermore smoke summer 26", "wvslammers red summer all stars", 0, 5, "2026-06-21"], ["vacaville all stars", "pgsl sirens all stars", 5, 3, "2026-06-13"], ["vacaville all stars", "wicked rec", 12, 1, "2026-06-13"], ["vacaville all stars", "sunnyvale shockwave", 12, 9, "2026-06-14"], ["vacaville all stars", "sunnyvale shockwave", 9, 7, "2026-06-14"], ["vacaville all stars", "pgsl sirens all stars", 4, 5, "2026-06-14"], ["vacaville all stars", "lady patriots", 12, 4, "2026-06-21"], ["vacaville all stars", "foster city flash", 9, 10, "2026-06-21"], ["vacaville all stars", "san lorenzo heat", 10, 9, "2026-06-22"], ["steal breeze fahy", "campbell crush", 2, 2, "2026-05-30"], ["steal breeze fahy", "campbell crush", 7, 2, "2026-05-31"], ["steal breeze fahy", "outlaws carmichael", 9, 1, "2026-05-31"], ["steal breeze fahy", "revolution", 12, 1, "2026-06-19"], ["steal breeze fahy", "novato heat castellucci", 14, 7, "2026-06-19"], ["steal breeze fahy", "santa rosa red barons red", 4, 3, "2026-06-21"], ["force comp", "foster city flash", 15, 4, "2026-05-17"], ["force comp", "san bruno storm 8c junio", 0, 3, "2026-05-30"], ["force comp", "hmb waves orange", 4, 1, "2026-05-30"], ["force comp", "8c burlingame flames 2026", 9, 3, "2026-05-31"], ["force comp", "san bruno storm 8c junio", 4, 0, "2026-06-06"], ["force comp", "san bruno storm 8c junio", 2, 0, "2026-06-07"], ["force comp", "tremors black", 10, 1, "2026-06-20"], ["force comp", "pgsl sirens all stars", 4, 1, "2026-06-20"], ["force comp", "santa cruz crushers", 1, 0, "2026-06-21"], ["san bruno storm 8c junio", "rebels black mckeon", 3, 0, "2026-05-24"], ["san bruno storm 8c junio", "hmb waves black", 6, 1, "2026-05-31"], ["san bruno storm 8c junio", "marin tremors", 8, 0, "2026-06-06"], ["san bruno storm 8c junio", "8c burlingame flames 2026", 11, 8, "2026-06-13"], ["san bruno storm 8c junio", "force comp", 3, 3, "2026-06-18"]]};
+
+(function () {
+  const T = GC.teams, G = GC.games, ME = GC.me, MU = GC.mu, SIGMA = GC.sigma;
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function disp(cn){ return esc((T[cn] && T[cn].d) || cn); }
+  function fmtM(x){ return (x >= 0 ? '+' : '') + x.toFixed(1); }
+  function signed(x, unit, goodHigh){
+    unit = unit || ''; if (goodHigh === undefined) goodHigh = true;
+    var cls = (x >= 0.8) ? (goodHigh ? 'good' : 'bad')
+            : (x <= -0.8) ? (goodHigh ? 'bad' : 'good') : 'neu';
+    return "<span class='stat " + cls + "'>" + fmtM(x) + unit + "</span>";
+  }
+  function pct(p){ var c = p >= 0.55 ? 'good' : (p <= 0.45 ? 'bad' : 'neu');
+    return "<span class='stat " + c + "'>" + Math.round(p * 100) + "%</span>"; }
+  function sosSpan(x){ var c = x >= 0.4 ? 'tough' : (x <= -0.4 ? 'soft' : 'neu');
+    return "<span class='stat " + c + "'>" + fmtM(x) + "</span>"; }
+  function label(x){ return x >= 2 ? 'very strong' : x >= 0.8 ? 'strong'
+    : x > -0.8 ? 'average' : x > -2 ? 'weak' : 'very weak'; }
+  function labelSpan(w){ var c = (w === 'very strong' || w === 'strong') ? 'good'
+    : (w === 'weak' || w === 'very weak') ? 'bad' : 'neu';
+    return "<span class='stat " + c + "'>" + w + "</span>"; }
+  function mean(a){ return a.reduce(function (s, x){ return s + x; }, 0) / a.length; }
+
+  function commonOpps(me, opp){
+    var res = {};
+    G.forEach(function (g){
+      [[g[0], g[1], g[2], g[3]], [g[1], g[0], g[3], g[2]]].forEach(function (p){
+        var who = p[0], other = p[1], s = p[2], o = p[3];
+        if (who === me) { (res[other] = res[other] || {me: [], opp: []}).me.push(s - o); }
+        if (who === opp) { (res[other] = res[other] || {me: [], opp: []}).opp.push(s - o); }
+      });
+    });
+    var common = {};
+    Object.keys(res).forEach(function (t){
+      if (t === me || t === opp) return;
+      if (res[t].me.length && res[t].opp.length) common[t] = res[t];
+    });
+    return common;
+  }
+  function h2h(me, opp){
+    var out = [];
+    G.forEach(function (g){
+      if (g[0] === me && g[1] === opp) out.push(g[2] - g[3]);
+      else if (g[0] === opp && g[1] === me) out.push(g[3] - g[2]);
+    });
+    return out;
+  }
+  function project(opp){
+    var me = ME;
+    var mm = T[me].ma - T[opp].ma;
+    var common = commonOpps(me, opp);
+    var edges = Object.keys(common).map(function (t){ return mean(common[t].me) - mean(common[t].opp); });
+    var cm = edges.length ? mean(edges) : null;
+    var hh = h2h(me, opp);
+    var hm = hh.length ? mean(hh) : null;
+    var wMass = 1, wCom = Math.min(edges.length, 8) / 8 * 1.5, wH = Math.min(hh.length, 3) * 0.8;
+    var num = mm * wMass, den = wMass;
+    if (cm !== null) { num += cm * wCom; den += wCom; }
+    if (hm !== null) { num += hm * wH; den += wH; }
+    var blended = num / den;
+    var winp = 1 / (1 + Math.exp(-blended / SIGMA));
+    var cc = Object.keys(common).length;
+    var confScore = cc + (hh.length ? 2 : 0) + Math.min(T[opp].gp, 6) / 6;
+    var conf = confScore >= 5 ? 'moderate' : (confScore >= 3 ? 'low-moderate' : 'low');
+    var expRs = Math.max(0, MU + T[me].off - T[opp].def);
+    var expRa = Math.max(0, MU + T[opp].off - T[me].def);
+    return {mm: mm, cm: cm, hm: hm, blended: blended, winp: winp, cc: cc, conf: conf,
+            common: common, h2h: hh, expRs: expRs, expRa: expRa};
+  }
+  function card(cn){
+    var s = T[cn];
+    return "<h3>" + disp(cn) + "</h3><ul>"
+      + "<li>Record: <b>" + esc(s.rec) + "</b> (win% " + Math.round(s.wp * 100) + "%, last5 " + esc(s.l5) + ")</li>"
+      + "<li>Power (Massey): " + signed(s.ma, ' runs') + " &middot; Elo " + s.elo + "</li>"
+      + "<li>Offense: " + signed(s.off, ' runs') + " adj &middot; " + s.rs.toFixed(1) + " runs scored/game</li>"
+      + "<li>Defense: " + signed(s.def, ' runs') + " adj &middot; " + s.ra.toFixed(1) + " runs allowed/game</li>"
+      + "<li>Strength of schedule: " + sosSpan(s.sos) + " &middot; Avg margin: " + signed(s.am, ' runs') + " over " + s.gp + " games</li>"
+      + "</ul>";
+  }
+  function commonTable(common){
+    var keys = Object.keys(common);
+    if (!keys.length) return "<p><em>No common opponents found in the data.</em></p>";
+    keys.sort(function (a, b){
+      return (mean(common[b].me) - mean(common[b].opp)) - (mean(common[a].me) - mean(common[a].opp));
+    });
+    var rows = "<table><thead><tr><th>Common opponent</th><th>Your result(s)</th>"
+      + "<th>Their result(s)</th><th>Edge</th></tr></thead><tbody>";
+    keys.forEach(function (t){
+      var d = common[t], edge = mean(d.me) - mean(d.opp);
+      rows += "<tr><td>" + disp(t) + "</td><td>" + d.me.map(fmtM).join(', ')
+        + "</td><td>" + d.opp.map(fmtM).join(', ') + "</td><td>" + signed(edge) + "</td></tr>";
+    });
+    return rows + "</tbody></table>";
+  }
+  function last5Table(opp){
+    var gs = [];
+    G.forEach(function (g){
+      var date = g[4] || "";
+      if (g[0] === opp) gs.push({date: date, other: g[1], ts: g[2], os: g[3]});
+      else if (g[1] === opp) gs.push({date: date, other: g[0], ts: g[3], os: g[2]});
+    });
+    gs.sort(function (a, b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+    gs = gs.slice(0, 5);
+    if (!gs.length) return "<p><em>No recent games in the data.</em></p>";
+    var rows = "<table><thead><tr><th>Date</th><th>Opponent</th><th>Score</th>"
+      + "<th>Result</th></tr></thead><tbody>";
+    gs.forEach(function (g){
+      var res = g.ts > g.os ? "W" : (g.ts < g.os ? "L" : "T");
+      var cls = res === "W" ? "good" : (res === "L" ? "bad" : "neu");
+      rows += "<tr><td>" + esc(g.date || "—") + "</td><td>" + disp(g.other) + "</td><td>"
+        + g.ts + "&ndash;" + g.os + "</td><td><span class='stat " + cls + "'>" + res + "</span></td></tr>";
+    });
+    return rows + "</tbody></table>";
+  }
+  function render(opp){
+    var p = project(opp);
+    var verdict = p.blended > 0 ? 'you favored' : 'opponent favored';
+    var h = "";
+    h += "<p class='proj'><b>vs <span class='team'>" + disp(opp) + "</span></b> &mdash; projected "
+      + signed(p.blended, ' runs') + " (" + verdict + "), win prob " + pct(p.winp)
+      + " &middot; confidence: <em>" + p.conf + "</em></p>";
+    h += "<p><b>Prepare for:</b> their offense is " + labelSpan(label(T[opp].off)) + " ("
+      + signed(T[opp].off) + " adj) &mdash; likely to score ~<b>" + Math.round(p.expRa) + "</b> on you; "
+      + "their defense is " + labelSpan(label(T[opp].def)) + " (" + signed(T[opp].def)
+      + " adj) &mdash; you should put up ~<b>" + Math.round(p.expRs) + "</b>.</p>";
+    h += "<p class='sig'>signals: rating gap " + fmtM(p.mm)
+      + (p.cm !== null ? " &middot; common-opp " + fmtM(p.cm) : "")
+      + (p.hm !== null ? " &middot; head-to-head " + fmtM(p.hm) : "")
+      + " (" + p.cc + " common opponents)</p>";
+    h += card(opp);
+    h += "<h4>Common opponents vs you</h4>" + commonTable(p.common);
+    h += "<h4>" + disp(opp) + " &mdash; last 5 games</h4>" + last5Table(opp);
+    document.getElementById('mx-out').innerHTML = h;
+  }
+  var sel = document.getElementById('mx-pick');
+  if (!sel) return;
+  Object.keys(T).filter(function (cn){ return cn !== ME && T[cn].seed; })
+    .sort(function (a, b){ return T[a].d.localeCompare(T[b].d); })
+    .forEach(function (cn){
+      var o = document.createElement('option');
+      o.value = cn; o.textContent = T[cn].d; sel.appendChild(o);
+    });
+  sel.addEventListener('change', function (){ if (sel.value) render(sel.value); });
+  if (sel.options.length) {
+    var d0 = GC.def0;
+    var has = Array.prototype.some.call(sel.options, function (o){ return o.value === d0; });
+    sel.value = has ? d0 : sel.options[0].value;
+    render(sel.value);
+  }
+})();
+
+</script>
+<script>
+  function num(cell) {
+    var n = parseFloat((cell.textContent || "").replace(/[^0-9.+-]/g, ""));
+    return isNaN(n) ? null : n;
+  }
+  function sortTable(tbl, col, th) {
+    var body = tbl.tBodies[0];
+    var rows = Array.prototype.slice.call(body.rows);
+    var numeric = rows.every(function (r) {
+      var c = r.cells[col]; return !c || c.textContent.trim() === "" || num(c) !== null;
+    });
+    var dir = th.getAttribute("data-dir") === "desc" ? "asc" : "desc";
+    var heads = tbl.tHead.rows[0].cells;
+    for (var h = 0; h < heads.length; h++) {
+      heads[h].removeAttribute("data-dir");
+      var old = heads[h].querySelector(".arrow"); if (old) old.remove();
+    }
+    th.setAttribute("data-dir", dir);
+    var arrow = document.createElement("span");
+    arrow.className = "arrow";
+    arrow.textContent = dir === "asc" ? " \u25B2" : " \u25BC";
+    th.appendChild(arrow);
+    rows.sort(function (a, b) {
+      var ca = a.cells[col], cb = b.cells[col], cmp;
+      if (numeric) {
+        var na = num(ca), nb = num(cb);
+        na = na === null ? -Infinity : na; nb = nb === null ? -Infinity : nb;
+        cmp = na - nb;
+      } else {
+        cmp = (ca.textContent || "").trim().localeCompare((cb.textContent || "").trim());
+      }
+      return dir === "asc" ? cmp : -cmp;
+    });
+    rows.forEach(function (r) { body.appendChild(r); });
+  }
+  document.querySelectorAll("table").forEach(function (tbl) {
+    if (!tbl.tHead) return;
+    var heads = Array.prototype.slice.call(tbl.tHead.rows[0].cells);
+    var isSoS = heads.some(function (th) {
+      return /^(SoS|Power|Offense|Defense)$/i.test(th.textContent.trim());
+    });
+    if (!isSoS) return;
+    heads.forEach(function (th, i) {
+      th.classList.add("sortcol");
+      th.title = "Click to sort";
+      th.addEventListener("click", function () { sortTable(tbl, i, th); });
+    });
+  });
+})();
+</script>
+</body></html>
