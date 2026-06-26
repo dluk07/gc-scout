@@ -41,10 +41,14 @@ PAGES_BASE = "https://dluk07.github.io/gc-scout"
 ID = r"[A-Za-z0-9]{12}"
 TEAMS_URL_RE = re.compile(r"/teams/(" + ID + r")")
 BARE_ID_RE = re.compile(r"^" + ID + r"$")
-ROLE_ALIASES = {
-    "me": "me", "my": "me", "home": "me",
-    "opp": "opp", "opponent": "opp", "vs": "opp", "next": "opp",
-    "extra": "extra", "seed": "extra", "sos": "extra",
+# section headers (any line with no team id) set the role for the URLs beneath them
+SECTION_ALIASES = {
+    "me": "me", "my": "me", "my team": "me", "myteam": "me", "home": "me",
+    "team": "me", "us": "me", "our team": "me",
+    "opp": "opp", "opps": "opp", "opponent": "opp", "opponents": "opp",
+    "vs": "opp", "next": "opp", "next opponent": "opp", "next opponents": "opp",
+    "seed": "extra", "seeds": "extra", "extra": "extra", "extras": "extra",
+    "sos": "extra", "other": "extra", "other teams": "extra",
 }
 
 
@@ -66,33 +70,53 @@ def extract_id(text):
     return tok if BARE_ID_RE.match(tok) else None
 
 
+def _section_role(header):
+    """Map a section-header line (e.g. 'my team:', 'opponent:', 'seed:') to a role."""
+    h = re.sub(r"\s+", " ", header.strip().rstrip(":").strip().lower())
+    return SECTION_ALIASES.get(h)
+
+
 def parse_teams_file(path):
-    """Parse a teams file of `role  url-or-id` lines (# comments allowed).
-    Returns (me_id, [opp_ids], [extra_ids]) with me/opps removed from extras."""
+    """Parse a teams file written as labeled sections, e.g.
+
+        my team:
+        https://web.gc.com/teams/oAa7MJ7B2N1x
+
+        opponent:
+        https://web.gc.com/teams/tmRJRFHZgPDa
+
+        seed:
+        https://web.gc.com/teams/4UMPZp88k64i
+        ...
+
+    A line with a team id (URL or bare 12-char id) is a team in the current section;
+    any other line is a header that switches the section. Returns
+    (me_id, [opp_ids], [extra_ids]) with me/opps removed from extras."""
     me, opps, extra = None, [], []
+    role = None
     for n, raw in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        parts = line.split(None, 1)
-        role = ROLE_ALIASES.get(parts[0].lower())
-        rest = parts[1] if len(parts) > 1 else ""
-        if role is None:
-            # no recognized role prefix — treat the whole line as an extra seed
-            tid = extract_id(line)
-            role, rest = "extra", line
-        else:
-            tid = extract_id(rest)
-        if not tid:
-            print(f"  ! teams.txt line {n}: no team id found, skipped: {line!r}")
+        tid = extract_id(line)
+        if tid is None:                      # header line → switch section
+            role = _section_role(line)
+            if role is None:
+                print(f"  ! teams file line {n}: unrecognized header {line!r} "
+                      f"(use 'my team:', 'opponent:', or 'seed:')")
             continue
         if role == "me":
+            if me and me != tid:
+                print(f"  ! teams file line {n}: second 'my team' id, using the latest")
             me = tid
         elif role == "opp":
             opps.append(tid)
-        else:
+        elif role == "extra":
             extra.append(tid)
-    # de-dupe: opps win over extras; me is never an opp/extra
+        else:                                # team id before any header
+            print(f"  ! teams file line {n}: team listed before any section header, "
+                  f"treating as a seed: {line}")
+            extra.append(tid)
     opps = list(dict.fromkeys(opps))
     extra = [e for e in dict.fromkeys(extra) if e != me and e not in opps]
     return me, opps, extra

@@ -1,19 +1,22 @@
 # gc-scout teams file
-# One team per line:  ROLE  <web.gc.com URL or 12-char id>
 #
-# Roles:
-#   me     your team (exactly one)
-#   opp    an upcoming opponent to project a matchup against (zero or more)
-#   extra  another team, just to deepen strength-of-schedule (zero or more)
+# Just paste web.gc.com URLs (or 12-char ids) under a section label.
+# The label applies to every team beneath it until the next label.
 #
-# The 12-char id is auto-extracted from the URL, so you can paste the whole
-# web.gc.com link. Lines starting with # are ignored.
+# Labels (case-insensitive, trailing ":" optional):
+#   my team:    your team (exactly one)
+#   opponent:   an upcoming opponent to project a matchup against (zero or more)
+#   seed:       another team, just to deepen strength-of-schedule (zero or more)
+#
+# The 12-char id is auto-extracted, so paste the whole link. # lines are ignored.
 
-me     https://web.gc.com/teams/9rpA1Riw3pSY/2026-summer-8u-mischiefs-c-8u/schedule
+my team:
+https://web.gc.com/teams/oAa7MJ7B2N1x
 
-opp    https://web.gc.com/teams/U3SbqWb4YPke/
-opp    https://web.gc.com/teams/BUZ2EzE23lWB/
+opponent:
+https://web.gc.com/teams/tmRJRFHZgPDa
 
-extra  https://web.gc.com/teams/opJMxaYM6zHS/
-extra  https://web.gc.com/teams/qGRVxTkKve40/
-extra  https://web.gc.com/teams/amOUKwSPP0Yz/
+seed:
+https://web.gc.com/teams/4UMPZp88k64i
+https://web.gc.com/teams/Sxxkxr3znK3x
+https://web.gc.com/teams/TKUbxz4CW3OP

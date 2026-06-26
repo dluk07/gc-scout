@@ -54,15 +54,24 @@ coach-API probe scripts; see below.)
 
 ## Run
 
-The easiest way is a **teams file** — list each team's `web.gc.com` URL (the 12-char id is
-parsed out for you) with a role prefix. Copy `teams.example.txt` to `teams.txt` and edit:
+The easiest way is a **teams file** — paste each team's `web.gc.com` URL (the 12-char id is
+parsed out for you) under a section label. Copy `teams.example.txt` to `teams.txt` and edit:
 
 ```text
-me     https://web.gc.com/teams/9rpA1Riw3pSY/2026-summer-8u-mischiefs-c-8u/schedule
-opp    https://web.gc.com/teams/U3SbqWb4YPke/
-opp    https://web.gc.com/teams/BUZ2EzE23lWB/
-extra  https://web.gc.com/teams/opJMxaYM6zHS/
+my team:
+https://web.gc.com/teams/9rpA1Riw3pSY/2026-summer-8u-mischiefs-c-8u/schedule
+
+opponent:
+https://web.gc.com/teams/U3SbqWb4YPke
+https://web.gc.com/teams/BUZ2EzE23lWB
+
+seed:
+https://web.gc.com/teams/opJMxaYM6zHS
+https://web.gc.com/teams/qGRVxTkKve40
 ```
+
+A label applies to every team beneath it until the next label (`my team:` / `opponent:` /
+`seed:`). No per-line prefixes — just paste your list.
 
 Then:
 
