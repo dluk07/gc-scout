@@ -1,0 +1,51 @@
+name: Refresh scores
+
+# Manual, on-demand refresh. Tap "Run workflow" in the Actions tab (works from a
+# phone browser). Pulls fresh GameChanger scores, regenerates both reports, and
+# republishes to GitHub Pages. No scheduled trigger — runs only when you click.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-scores
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Regenerate reports with fresh scores
+        run: |
+          python main.py --teams schedule/8c.txt \
+            --name "8C Scouting Report for NorCal Tournament" \
+            --refresh --publish --no-open
+          python main.py --teams schedule/10b.txt \
+            --name "10B Scouting Report for NorCal Tournament" \
+            --refresh --publish --no-open
+
+      - name: Commit and push if scores changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          if git diff --staged --quiet; then
+            echo "No score changes since last refresh."
+          else
+            git commit -m "Auto-refresh scores ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+            git push
+          fi
