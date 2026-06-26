@@ -1,0 +1,7 @@
+.env
+cache/
+reports/
+games.json
+__pycache__/
+*.pyc
+probe*.py
