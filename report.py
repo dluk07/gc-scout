@@ -258,32 +258,105 @@ _C_ME, _C_OPP, _C_OTHER = "#ff6b00", "#0d9488", "#9ca3af"
 
 
 def _chart_data(result, me_name, opp_names):
-    """Build JSON-able data for the power-ranking bar + offense/defense scatter,
-    over the seed teams (the ones with full schedules)."""
+    """Data for the power-ranking bar + offense/defense scatter over the seed teams.
+    Carries canon ids so the matchup dropdown can recolor/repartition them live."""
     summ = result["summary"]
-    opp_set = set(opp_names)
     seeds = [(cn, s) for cn, s in summ.items() if s["is_seed"]]
-
-    def color(cn):
-        return _C_ME if cn == me_name else (_C_OPP if cn in opp_set else _C_OTHER)
 
     # power ranking: strongest at top
     seeds_by_power = sorted(seeds, key=lambda kv: kv[1]["massey"], reverse=True)
     power = {
         "labels": [_short(s["display"]) for _, s in seeds_by_power],
         "values": [round(s["massey"], 2) for _, s in seeds_by_power],
-        "colors": [color(cn) for cn, _ in seeds_by_power],
+        "canon": [cn for cn, _ in seeds_by_power],
     }
 
-    # offense (x) vs defense (y) scatter, grouped for a meaningful legend
-    groups = {"You": [], "Opponents": [], "Other seeds": []}
+    # offense (x) vs defense (y) points; me kept separate, the rest partitioned in JS
+    me_point, others = None, []
     for cn, s in seeds:
-        bucket = "You" if cn == me_name else ("Opponents" if cn in opp_set else "Other seeds")
-        groups[bucket].append({"x": round(s["off"], 2), "y": round(s["def"], 2),
-                               "label": _short(s["display"], 18)})
-    offdef = {"You": groups["You"], "Opponents": groups["Opponents"],
-              "Other": groups["Other seeds"]}
-    return {"power": power, "offdef": offdef}
+        pt = {"cn": cn, "x": round(s["off"], 2), "y": round(s["def"], 2),
+              "label": _short(s["display"], 18)}
+        if cn == me_name:
+            me_point = pt
+        else:
+            others.append(pt)
+    return {"me": me_name, "default": next((o for o in opp_names if o), ""),
+            "power": power, "mePoint": me_point, "others": others,
+            "cMe": _C_ME, "cOpp": _C_OPP, "cOther": _C_OTHER}
+
+
+# plain JS (no Python interpolation) — PC is injected as a const just above it.
+# Exposes window.gcUpdateCharts(sel) so the matchup dropdown can recolor both charts.
+_CHARTS_JS = """
+(function () {
+  var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var grid = dark ? '#3a3a3a' : '#e3e3e3';
+  var tick = dark ? '#d7dee8' : '#444';
+  Chart.register(ChartDataLabels);
+
+  function colorsFor(sel) {
+    return PC.power.canon.map(function (cn) {
+      return cn === PC.me ? PC.cMe : (cn === sel ? PC.cOpp : PC.cOther);
+    });
+  }
+  var powerChart = new Chart(document.getElementById('powerChart'), {
+    type: 'bar',
+    data: { labels: PC.power.labels,
+      datasets: [{ label: 'Power (runs vs avg)', data: PC.power.values,
+        backgroundColor: colorsFor(PC.default), borderRadius: 4 }] },
+    options: { indexAxis: 'y', responsive: true,
+      plugins: { legend: { display: false },
+        title: { display: true, text: 'Power rankings (Massey, runs vs. average)', color: tick },
+        datalabels: { anchor: 'end', align: 'end', color: tick,
+          formatter: function (v) { return (v >= 0 ? '+' : '') + v.toFixed(1); } } },
+      scales: { x: { grid: { color: grid }, ticks: { color: tick },
+          title: { display: true, text: 'runs vs. average', color: tick } },
+        y: { grid: { display: false }, ticks: { color: tick } } } }
+  });
+
+  function mkPts(arr, c, label, r) {
+    return { label: label, data: arr, backgroundColor: c,
+             pointRadius: r || 7, pointHoverRadius: (r || 7) + 2 };
+  }
+  function offdefDatasets(sel) {
+    var selPt = null, rest = [];
+    PC.others.forEach(function (p) { if (p.cn === sel) selPt = p; else rest.push(p); });
+    var ds = [ mkPts([PC.mePoint], PC.cMe, 'You'), mkPts(rest, PC.cOther, 'Other teams') ];
+    if (selPt) ds.push(mkPts([selPt], PC.cOpp, 'Selected opponent', 9));
+    return ds;
+  }
+  var quad = { id: 'quad', beforeDraw: function (c) {
+    var ctx = c.ctx, a = c.chartArea, sc = c.scales;
+    var x0 = sc.x.getPixelForValue(0), y0 = sc.y.getPixelForValue(0);
+    ctx.save(); ctx.strokeStyle = dark ? '#555' : '#bbb'; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(x0, a.top); ctx.lineTo(x0, a.bottom);
+    ctx.moveTo(a.left, y0); ctx.lineTo(a.right, y0); ctx.stroke(); ctx.restore();
+  } };
+  var offDefChart = new Chart(document.getElementById('offDefChart'), {
+    type: 'scatter',
+    data: { datasets: offdefDatasets(PC.default) },
+    plugins: [quad],
+    options: { responsive: true,
+      plugins: { legend: { labels: { color: tick } },
+        title: { display: true, text: 'Offense vs. Defense (top-right = strong both sides)', color: tick },
+        datalabels: { align: 'right', offset: 6, color: tick, font: { size: 10 },
+          formatter: function (v, ctx) { return ctx.dataset.data[ctx.dataIndex].label; } },
+        tooltip: { callbacks: { label: function (c) { return c.raw.label + ': off ' + c.raw.x + ', def ' + c.raw.y; } } } },
+      scales: {
+        x: { grid: { color: grid }, ticks: { color: tick },
+          title: { display: true, text: 'Offense  \\u2192  scores more', color: tick } },
+        y: { grid: { color: grid }, ticks: { color: tick },
+          title: { display: true, text: 'Defense  \\u2192  allows fewer', color: tick } } } }
+  });
+
+  window.gcUpdateCharts = function (sel) {
+    powerChart.data.datasets[0].backgroundColor = colorsFor(sel);
+    powerChart.update();
+    offDefChart.data.datasets = offdefDatasets(sel);
+    offDefChart.update();
+  };
+})();
+"""
 
 
 def _charts_html(result, me_name, opp_names):
@@ -291,66 +364,11 @@ def _charts_html(result, me_name, opp_names):
     d = _chart_data(result, me_name, opp_names)
     power_canvas = "<div class='chart-wrap'><canvas id='powerChart' height='260'></canvas></div>"
     offdef_canvas = "<div class='chart-wrap'><canvas id='offDefChart' height='340'></canvas></div>"
-    script = f"""
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script>
-const POWER = {json.dumps(d['power'])};
-const OFFDEF = {json.dumps(d['offdef'])};
-const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-const grid = dark ? '#3a3a3a' : '#e3e3e3';
-const tick = dark ? '#d7dee8' : '#444';
-Chart.register(ChartDataLabels);
-
-// --- Power rankings (horizontal bars) ---
-new Chart(document.getElementById('powerChart'), {{
-  type: 'bar',
-  data: {{ labels: POWER.labels,
-    datasets: [{{ label: 'Power (runs vs avg)', data: POWER.values,
-      backgroundColor: POWER.colors, borderRadius: 4 }}] }},
-  options: {{ indexAxis: 'y', responsive: true,
-    plugins: {{ legend: {{ display: false }},
-      title: {{ display: true, text: 'Power rankings (Massey, runs vs. average)', color: tick }},
-      datalabels: {{ anchor: 'end', align: 'end', color: tick,
-        formatter: v => (v >= 0 ? '+' : '') + v.toFixed(1) }} }},
-    scales: {{ x: {{ grid: {{ color: grid }}, ticks: {{ color: tick }},
-        title: {{ display: true, text: 'runs vs. average', color: tick }} }},
-      y: {{ grid: {{ display: false }}, ticks: {{ color: tick }} }} }} }}
-}});
-
-// --- Offense vs Defense quadrant scatter ---
-const mkPts = (arr, c) => ({{ data: arr, backgroundColor: c, pointRadius: 7,
-  pointHoverRadius: 9 }});
-// guideline plugin: draw axes at 0,0 to split the four quadrants
-const quad = {{ id: 'quad', beforeDraw(c) {{
-  const {{ctx, chartArea: a, scales}} = c;
-  const x0 = scales.x.getPixelForValue(0), y0 = scales.y.getPixelForValue(0);
-  ctx.save(); ctx.strokeStyle = dark ? '#555' : '#bbb'; ctx.setLineDash([5,4]);
-  ctx.beginPath(); ctx.moveTo(x0, a.top); ctx.lineTo(x0, a.bottom);
-  ctx.moveTo(a.left, y0); ctx.lineTo(a.right, y0); ctx.stroke(); ctx.restore();
-}} }};
-new Chart(document.getElementById('offDefChart'), {{
-  type: 'scatter',
-  data: {{ datasets: [
-    Object.assign(mkPts(OFFDEF.You, '{_C_ME}'), {{ label: 'You' }}),
-    Object.assign(mkPts(OFFDEF.Opponents, '{_C_OPP}'), {{ label: 'Opponents' }}),
-    Object.assign(mkPts(OFFDEF.Other, '{_C_OTHER}'), {{ label: 'Other seeds' }}),
-  ] }},
-  plugins: [quad],
-  options: {{ responsive: true,
-    plugins: {{ legend: {{ labels: {{ color: tick }} }},
-      title: {{ display: true, text: 'Offense vs. Defense (top-right = strong both sides)', color: tick }},
-      datalabels: {{ align: 'right', offset: 6, color: tick, font: {{ size: 10 }},
-        formatter: (v, ctx) => ctx.dataset.data[ctx.dataIndex].label }},
-      tooltip: {{ callbacks: {{ label: c => `${{c.raw.label}}: off ${{c.raw.x}}, def ${{c.raw.y}}` }} }} }},
-    scales: {{
-      x: {{ grid: {{ color: grid }}, ticks: {{ color: tick }},
-        title: {{ display: true, text: 'Offense  →  scores more', color: tick }} }},
-      y: {{ grid: {{ color: grid }}, ticks: {{ color: tick }},
-        title: {{ display: true, text: 'Defense  →  allows fewer', color: tick }} }} }} }}
-}});
-</script>
-"""
+    script = (
+        '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>'
+        '<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/'
+        'chartjs-plugin-datalabels.min.js"></script>'
+        '<script>\nconst PC = ' + json.dumps(d) + ';\n' + _CHARTS_JS + '\n</script>')
     return power_canvas, offdef_canvas, script
 
 
@@ -542,6 +560,7 @@ _EXPLORER_JS = """
     h += "<h4>" + disp(opp) + " &mdash; last 5 games</h4>" + last5Table(opp);
     document.getElementById('mx-out').innerHTML = h;
     highlightOpp(opp);
+    if (window.gcUpdateCharts) window.gcUpdateCharts(opp);
   }
   var sel = document.getElementById('mx-pick');
   if (!sel) return;
