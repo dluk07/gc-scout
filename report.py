@@ -107,23 +107,18 @@ def render_markdown(data, result, me_name, opp_names, title="GameChanger Scoutin
                  "bottom-left = beatable both sides. Your team is highlighted._\n")
     lines.append("[[OFFDEF_CHART]]")
 
-    # SoS leaderboard among seeds — the "#" rank column renumbers live when you sort
-    opp_set = set(opp_names)
+    # SoS leaderboard among seeds — "#" renumbers on sort; opponent highlight is set
+    # dynamically by the explorer dropdown (each row carries data-cn for the JS to target)
     seeds = [(cn, s) for cn, s in summ.items() if s["is_seed"]]
     seeds.sort(key=lambda kv: kv[1]["sos"], reverse=True)
     lines.append("## Strength of schedule (seed teams)\n")
     lines.append("| # | Team | SoS | Power | Offense | Defense | Record |")
     lines.append("|---|---|---|---|---|---|---|")
     for i, (cn, s) in enumerate(seeds, 1):
-        if cn == me_name:
-            rank = f"<span class='you-row'></span>{i}"
-            team = f"**{s['display']}** <span class='youbadge'>you</span>"
-        elif cn in opp_set:
-            rank = f"<span class='opp-row'></span>{i}"
-            team = f"**{s['display']}** <span class='oppbadge'>next opp</span>"
-        else:
-            rank = str(i)
-            team = s['display']
+        you = " data-you" if cn == me_name else ""
+        rank = f"<span class='rowmeta' data-cn='{cn}'{you}></span>{i}"
+        team = (f"**{s['display']}** <span class='youbadge'>you</span>"
+                if cn == me_name else s['display'])
         lines.append(f"| {rank} | {team} | {_sos(s['sos'])} | "
                      f"{_signed(s['massey'])} | {_signed(s['off'])} | "
                      f"{_signed(s['def'])} | {_rec(s['api_record'])} |")
@@ -201,9 +196,9 @@ tr:nth-child(even) td { background: #faf7f4; }
 tr.you td { background: #fff3d6; box-shadow: inset 3px 0 0 #ff6b00; font-weight: 600; }
 tr.opp td { background: #e3f6f2; box-shadow: inset 3px 0 0 #0d9488; }
 .youbadge { background: #ff6b00; color: #fff; font-size: .72rem; font-weight: 700;
-            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; margin-left: .35rem; }
 .oppbadge { background: #0d9488; color: #fff; font-size: .72rem; font-weight: 700;
-            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; margin-left: .35rem; }
 code { background: #f2f2f2; padding: .1rem .3rem; border-radius: 3px; }
 ul { padding-left: 1.2rem; }
 .team { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
@@ -391,6 +386,31 @@ def _explorer_data(result, data, me_name, opp_names):
 _EXPLORER_JS = """
 (function () {
   const T = GC.teams, G = GC.games, ME = GC.me, MU = GC.mu, SIGMA = GC.sigma;
+  // locate the SoS table once so picking an opponent can highlight its row
+  var sosTable = null;
+  document.querySelectorAll("table").forEach(function (t) {
+    if (t.tHead && Array.prototype.some.call(t.tHead.rows[0].cells, function (th) {
+      return /^(SoS|Power|Offense|Defense)$/i.test(th.textContent.trim());
+    })) sosTable = t;
+  });
+  function highlightOpp(cn) {
+    if (!sosTable) return;
+    var rows = sosTable.tBodies[0].rows;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i];
+      if (r.classList.contains("you")) continue;   // never touch your own row
+      var sel = r.getAttribute("data-cn") === cn;
+      r.classList.toggle("opp", sel);
+      var cell = r.cells[1], badge = cell ? cell.querySelector(".oppbadge") : null;
+      if (sel && cell && !badge) {
+        var b = document.createElement("span");
+        b.className = "oppbadge"; b.textContent = "next opp";
+        cell.appendChild(b);
+      } else if (!sel && badge) {
+        badge.remove();
+      }
+    }
+  }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function disp(cn){ return esc((T[cn] && T[cn].d) || cn); }
   function fmtM(x){ return (x >= 0 ? '+' : '') + x.toFixed(1); }
@@ -521,6 +541,7 @@ _EXPLORER_JS = """
     h += "<h4>Common opponents vs you</h4>" + commonTable(p.common);
     h += "<h4>" + disp(opp) + " &mdash; last 5 games</h4>" + last5Table(opp);
     document.getElementById('mx-out').innerHTML = h;
+    highlightOpp(opp);
   }
   var sel = document.getElementById('mx-pick');
   if (!sel) return;
@@ -624,9 +645,13 @@ def render_html(md_text, result, me_name, opp_names, data=None, title="GC Scouti
     import re
     import markdown
     body = markdown.markdown(md_text, extensions=["tables", "sane_lists"])
-    # promote the marked SoS row to a highlighted <tr class='you'>
-    body = re.sub(r"<tr>\s*<td><span class='you-row'></span>", "<tr class='you'><td>", body)
-    body = re.sub(r"<tr>\s*<td><span class='opp-row'></span>", "<tr class='opp'><td>", body)
+    # tag each SoS row with its canon id (data-cn) so the explorer can highlight the
+    # picked opponent; your team's row gets a static class='you'
+    def _promote(m):
+        cls = " class='you'" if m.group(2) else ""
+        return f"<tr data-cn='{m.group(1)}'{cls}><td>"
+    body = re.sub(r"<tr>\s*<td><span class='rowmeta' data-cn='([^']*)'( data-you)?></span>",
+                  _promote, body)
     power_canvas, offdef_canvas, script = _charts_html(result, me_name, opp_names)
     # markdown wraps a lone sentinel line in <p>…</p>; swap those for the canvases
     body = body.replace("<p>[[POWER_CHART]]</p>", power_canvas)
