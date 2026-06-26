@@ -164,6 +164,31 @@ def publish(slug, title, html_text):
     return report_path
 
 
+def delete_report(ident):
+    """Remove a published report (matched by slug or name) and rebuild the index."""
+    manifest = DOCS / "reports.json"
+    if not manifest.exists():
+        sys.exit("No docs/reports.json — nothing to delete.")
+    entries = json.loads(manifest.read_text(encoding="utf-8"))
+    key = slugify(ident)
+    matched = [e for e in entries
+               if e.get("slug") in (ident, key) or slugify(e.get("title", "")) == key]
+    if not matched:
+        have = ", ".join(e["slug"] for e in entries) or "(none)"
+        sys.exit(f"No published report matching {ident!r}.\nPublished slugs: {have}")
+    remaining = [e for e in entries if e not in matched]
+    for e in matched:
+        f = DOCS / "r" / f"{e['slug']}.html"
+        if f.exists():
+            f.unlink()
+    remaining.sort(key=lambda e: e.get("ts", ""), reverse=True)
+    manifest.write_text(json.dumps(remaining, indent=2), encoding="utf-8")
+    (DOCS / "index.html").write_text(report.render_index(remaining), encoding="utf-8")
+    for e in matched:
+        print(f"Deleted: {e['title']}  (r/{e['slug']}.html)")
+    print(f"Index now lists {len(remaining)} report(s).")
+
+
 def main():
     ap = argparse.ArgumentParser(description="GameChanger strength-of-schedule & matchup scout")
     ap.add_argument("--teams", help="path to a teams file (role + URL/id per line); "
@@ -177,8 +202,14 @@ def main():
     ap.add_argument("--refresh", action="store_true", help="ignore cache, refetch")
     ap.add_argument("--publish", action="store_true",
                     help="add to docs/ and rebuild the GitHub Pages index")
+    ap.add_argument("--delete", default="",
+                    help="delete a published report (by name or slug), rebuild the index, and exit")
     ap.add_argument("--no-open", action="store_true", help="don't auto-open the HTML report")
     args = ap.parse_args()
+
+    if args.delete:
+        delete_report(args.delete)
+        return
 
     # --- resolve teams from a file or inline flags ---
     if args.teams:
