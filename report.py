@@ -1,7 +1,8 @@
 """
 report.py — render the analysis into a printable Markdown scouting report + a CSV of
-the ratings table.
+the ratings table, plus a charted HTML report and a Pages index of all reports.
 """
+import html
 import datetime
 
 
@@ -80,12 +81,12 @@ def _common_table(common, summ):
     return "\n".join(rows) + "\n"
 
 
-def render_markdown(data, result, me_name, opp_names):
+def render_markdown(data, result, me_name, opp_names, title="GameChanger Scouting Report"):
     summ = result["summary"]
     me = summ.get(me_name, {})
     lines = []
-    lines.append(f"# GameChanger Scouting Report")
-    lines.append(f"_Generated {datetime.date.today().isoformat()} · "
+    lines.append(f"# {title}")
+    lines.append(f"_Generated {datetime.datetime.now():%Y-%m-%d %H:%M} · "
                  f"{len(data['games'])} games across {len(data['teams'])} teams · "
                  f"home-field ≈ {_fmt_margin(result['home_adv'])} runs_\n")
 
@@ -243,6 +244,12 @@ ul { padding-left: 1.2rem; }
 .chart-wrap { margin: 1rem 0 1.6rem; padding: .8rem 1rem; border: 1px solid #eee;
               border-radius: 8px; background: #fff; }
 .chart-wrap canvas { max-width: 100%; }
+.replist { list-style: none; padding-left: 0; }
+.replist li { padding: .55rem .2rem; border-bottom: 1px solid #eee; display: flex;
+              flex-wrap: wrap; align-items: baseline; gap: .2rem .8rem; }
+.replist a { font-weight: 600; font-size: 1.05rem; text-decoration: none; color: #c2410c; }
+.replist a:hover { text-decoration: underline; }
+.gen { color: #888; font-size: .85rem; }
 @media (prefers-color-scheme: dark) {
   body { color: #e6e6e6; background: #1e1e1e; }
   h2 { border-color: #444; } th { background: #3a2a1a; }
@@ -250,6 +257,8 @@ ul { padding-left: 1.2rem; }
   tr.you td { background: #3a2f1a; }
   tr.opp td { background: #16302c; }
   th, td { border-color: #444; }
+  .replist li { border-color: #383838; } .replist a { color: #fb923c; }
+  .gen { color: #999; }
   .stat.good { color: #4ade80; } .stat.bad { color: #f87171; }
   .stat.neu { color: #d7dee8; } .stat.tough { color: #fb923c; } .stat.soft { color: #54c1f5; }
   .chart-wrap { background: #242424; border-color: #383838; }
@@ -362,7 +371,7 @@ new Chart(document.getElementById('offDefChart'), {{
     return power_canvas, offdef_canvas, script
 
 
-def render_html(md_text, result, me_name, opp_names):
+def render_html(md_text, result, me_name, opp_names, title="GC Scouting Report"):
     import re
     import markdown
     body = markdown.markdown(md_text, extensions=["tables", "sane_lists"])
@@ -375,5 +384,24 @@ def render_html(md_text, result, me_name, opp_names):
     body = body.replace("<p>[[OFFDEF_CHART]]</p>", offdef_canvas)
     return (f"<!doctype html><html><head><meta charset='utf-8'>"
             f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
-            f"<title>GC Scouting Report</title><style>{_CSS}</style></head>"
+            f"<title>{html.escape(title)}</title><style>{_CSS}</style></head>"
             f"<body>{body}{script}</body></html>")
+
+
+def render_index(entries, heading="8U Scouting Reports"):
+    """Landing page for GitHub Pages listing every published report (newest first).
+    entries: list of {slug, title, generated}."""
+    items = []
+    for e in entries:
+        items.append(
+            f"<li><a href='r/{html.escape(e['slug'])}.html'>{html.escape(e['title'])}</a>"
+            f"<span class='gen'>generated {html.escape(e.get('generated',''))}</span></li>")
+    listing = ("<ul class='replist'>" + "".join(items) + "</ul>") if items \
+        else "<p><em>No reports published yet.</em></p>"
+    body = (f"<h1>{html.escape(heading)}</h1>"
+            f"<p>Youth softball scouting reports generated from public GameChanger data. "
+            f"Newest first.</p>{listing}")
+    return (f"<!doctype html><html><head><meta charset='utf-8'>"
+            f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            f"<title>{html.escape(heading)}</title><style>{_CSS}</style></head>"
+            f"<body>{body}</body></html>")

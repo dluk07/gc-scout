@@ -1,0 +1,19 @@
+# gc-scout teams file
+# One team per line:  ROLE  <web.gc.com URL or 12-char id>
+#
+# Roles:
+#   me     your team (exactly one)
+#   opp    an upcoming opponent to project a matchup against (zero or more)
+#   extra  another team, just to deepen strength-of-schedule (zero or more)
+#
+# The 12-char id is auto-extracted from the URL, so you can paste the whole
+# web.gc.com link. Lines starting with # are ignored.
+
+me     https://web.gc.com/teams/9rpA1Riw3pSY/2026-summer-8u-mischiefs-c-8u/schedule
+
+opp    https://web.gc.com/teams/U3SbqWb4YPke/
+opp    https://web.gc.com/teams/BUZ2EzE23lWB/
+
+extra  https://web.gc.com/teams/opJMxaYM6zHS/
+extra  https://web.gc.com/teams/qGRVxTkKve40/
+extra  https://web.gc.com/teams/amOUKwSPP0Yz/

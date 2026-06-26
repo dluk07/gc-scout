@@ -1,4 +1,5 @@
 .env
+teams.txt
 cache/
 reports/
 games.json

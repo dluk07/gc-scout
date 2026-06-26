@@ -1,0 +1,495 @@
+<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>8U Scouting Report for 6/27 10:30am</title><style>
+:root { color-scheme: light dark; }
+body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+       max-width: 860px; margin: 2rem auto; padding: 0 1.2rem; line-height: 1.5;
+       color: #1a1a1a; background: #fff; }
+h1 { border-bottom: 3px solid #ff6b00; padding-bottom: .3rem; }
+h2 { margin-top: 1.8rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+h3 { margin-top: 1.2rem; color: #c2410c; }
+em { color: #666; }
+table { border-collapse: collapse; width: 100%; margin: .6rem 0 1.2rem; font-size: .93rem; }
+th, td { border: 1px solid #ddd; padding: .4rem .6rem; text-align: left; }
+th { background: #fff3e8; }
+tr:nth-child(even) td { background: #faf7f4; }
+tr.you td { background: #fff3d6; box-shadow: inset 3px 0 0 #ff6b00; font-weight: 600; }
+tr.opp td { background: #e3f6f2; box-shadow: inset 3px 0 0 #0d9488; }
+.youbadge { background: #ff6b00; color: #fff; font-size: .72rem; font-weight: 700;
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+.oppbadge { background: #0d9488; color: #fff; font-size: .72rem; font-weight: 700;
+            padding: .03rem .42rem; border-radius: 10px; vertical-align: middle; }
+code { background: #f2f2f2; padding: .1rem .3rem; border-radius: 3px; }
+ul { padding-left: 1.2rem; }
+.team { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+.stat { font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat.good  { color: #15803d; }   /* green  — strong / favorable */
+.stat.bad   { color: #b91c1c; }   /* red    — weak / unfavorable */
+.stat.neu   { color: #555; }      /* gray   — middle of the pack  */
+.stat.tough { color: #c2410c; }   /* amber  — hard schedule       */
+.stat.soft  { color: #0369a1; }   /* blue   — soft schedule       */
+.chart-wrap { margin: 1rem 0 1.6rem; padding: .8rem 1rem; border: 1px solid #eee;
+              border-radius: 8px; background: #fff; }
+.chart-wrap canvas { max-width: 100%; }
+.replist { list-style: none; padding-left: 0; }
+.replist li { padding: .55rem .2rem; border-bottom: 1px solid #eee; display: flex;
+              flex-wrap: wrap; align-items: baseline; gap: .2rem .8rem; }
+.replist a { font-weight: 600; font-size: 1.05rem; text-decoration: none; color: #c2410c; }
+.replist a:hover { text-decoration: underline; }
+.gen { color: #888; font-size: .85rem; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #1e1e1e; }
+  h2 { border-color: #444; } th { background: #3a2a1a; }
+  tr:nth-child(even) td { background: #262626; } code { background: #333; }
+  tr.you td { background: #3a2f1a; }
+  tr.opp td { background: #16302c; }
+  th, td { border-color: #444; }
+  .replist li { border-color: #383838; } .replist a { color: #fb923c; }
+  .gen { color: #999; }
+  .stat.good { color: #4ade80; } .stat.bad { color: #f87171; }
+  .stat.neu { color: #d7dee8; } .stat.tough { color: #fb923c; } .stat.soft { color: #54c1f5; }
+  .chart-wrap { background: #242424; border-color: #383838; }
+}
+</style></head><body><h1>8U Scouting Report for 6/27 10:30am</h1>
+<p><em>Generated 2026-06-26 12:31 · 257 games across 87 teams · home-field ≈ -0.5 runs</em></p>
+<h2>Saturday matchup projection</h2>
+<p>Your team: <strong><span class='team'>8U Mischiefs C 8U</span></strong> (rating <span class='stat good'>+4.0</span>)</p>
+<ul>
+<li><strong>vs <span class='team'>8u Slammers Comp</span></strong> — projected <span class='stat neu'>+0.6 runs</span> (you favored), win prob <span class='stat neu'>54%</span> · confidence: <em>moderate</em><ul>
+<li><strong>Prepare for:</strong> their offense is <span class='stat good'>strong</span> (<span class='stat good'>+1.8</span> adj) — likely to score ~<strong>5</strong> on you; their defense is <span class='stat neu'>average</span> (<span class='stat neu'>+0.6</span> adj) — you should put up ~<strong>6</strong>.</li>
+<li>signals: rating gap +1.3 · common-opp +0.9 · head-to-head -1.0  (7 common opponents)</li>
+</ul>
+</li>
+<li><strong>vs <span class='team'>Wicked Purple 8U</span></strong> — projected <span class='stat neu'>-0.3 runs</span> (opponent favored), win prob <span class='stat neu'>48%</span> · confidence: <em>low-moderate</em><ul>
+<li><strong>Prepare for:</strong> their offense is <span class='stat good'>very strong</span> (<span class='stat good'>+2.9</span> adj) — likely to score ~<strong>6</strong> on you; their defense is <span class='stat good'>very strong</span> (<span class='stat good'>+2.9</span> adj) — you should put up ~<strong>4</strong>.</li>
+<li>signals: rating gap -1.9 · common-opp +2.5  (3 common opponents)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Tougher draw:</strong> Wicked Purple 8U (lowest projected margin for you).</p>
+<h2>Power rankings &amp; matchup map</h2>
+<div class='chart-wrap'><canvas id='powerChart' height='260'></canvas></div>
+<p><em>Offense vs. defense — top-right = strong both sides; bottom-left = beatable both sides. Your team is highlighted.</em></p>
+<div class='chart-wrap'><canvas id='offDefChart' height='340'></canvas></div>
+<h2>Scouting cards</h2>
+<h3>8U Mischiefs C 8U</h3>
+<ul>
+<li>Record: <strong>9-11-1</strong>  (win% 48%, last5 3-2)</li>
+<li>Power rating (Massey): <span class='stat good'>+4.0 runs</span>  ·  Elo 1554</li>
+<li>Offense: <span class='stat good'>+2.3 runs</span> adj  ·  5.5 runs scored/game</li>
+<li>Defense: <span class='stat good'>+1.6 runs</span> adj  ·  4.4 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat tough'>+2.9</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat good'>+1.1 runs</span> over 22 games</li>
+</ul>
+<h3>8u Slammers Comp</h3>
+<ul>
+<li>Record: <strong>9-9-0</strong>  (win% 45%, last5 2-3)</li>
+<li>Power rating (Massey): <span class='stat good'>+2.6 runs</span>  ·  Elo 1443</li>
+<li>Offense: <span class='stat good'>+1.8 runs</span> adj  ·  4.1 runs scored/game</li>
+<li>Defense: <span class='stat neu'>+0.6 runs</span> adj  ·  5.5 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat tough'>+4.2</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat bad'>-1.4 runs</span> over 22 games</li>
+</ul>
+<p><strong>Common opponents vs you:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Common opponent</th>
+<th>Your result(s)</th>
+<th>Their result(s)</th>
+<th>Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Blaze 8u Sullivan 8U</td>
+<td>+7.0</td>
+<td>-8.0</td>
+<td>+15.0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td>-1.0, -2.0</td>
+<td>-7.0, -11.0, -9.0</td>
+<td>+7.5</td>
+</tr>
+<tr>
+<td>WVSlammers 8U Red Summer All Stars</td>
+<td>-1.0</td>
+<td>-10.0, -6.0</td>
+<td>+7.0</td>
+</tr>
+<tr>
+<td>San Bruno Storm 8C - Junio</td>
+<td>-1.0</td>
+<td>-2.0</td>
+<td>+1.0</td>
+</tr>
+<tr>
+<td>8C Burlingame Flames 2026 8U</td>
+<td>-4.0</td>
+<td>+2.0, +5.0, +1.0</td>
+<td>-6.7</td>
+</tr>
+<tr>
+<td>Force 8U Comp</td>
+<td>-5.0, -9.0</td>
+<td>+1.0</td>
+<td>-8.0</td>
+</tr>
+<tr>
+<td>Redhawks 8U Red</td>
+<td>+3.0, +0.0</td>
+<td>+12.0, +10.0</td>
+<td>-9.5</td>
+</tr>
+</tbody>
+</table>
+<h3>Wicked Purple 8U</h3>
+<ul>
+<li>Record: <strong>9-1-0</strong>  (win% 86%, last5 4-1)</li>
+<li>Power rating (Massey): <span class='stat good'>+5.8 runs</span>  ·  Elo 1682</li>
+<li>Offense: <span class='stat good'>+2.9 runs</span> adj  ·  7.5 runs scored/game</li>
+<li>Defense: <span class='stat good'>+2.9 runs</span> adj  ·  1.7 runs allowed/game</li>
+<li>Strength of schedule: <span class='stat neu'>-0.4</span> (avg opponent rating)</li>
+<li>Avg margin: <span class='stat good'>+5.8 runs</span> over 14 games</li>
+</ul>
+<p><strong>Common opponents vs you:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Common opponent</th>
+<th>Your result(s)</th>
+<th>Their result(s)</th>
+<th>Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Steal Breeze Fahy 8U</td>
+<td>+10.0</td>
+<td>+5.0, +7.0</td>
+<td>+4.0</td>
+</tr>
+<tr>
+<td>West County Wildcats 8U</td>
+<td>+10.0</td>
+<td>+7.0</td>
+<td>+3.0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td>-1.0, -2.0</td>
+<td>-1.0, -3.0</td>
+<td>+0.5</td>
+</tr>
+</tbody>
+</table>
+<h2>Strength of schedule (seed teams)</h2>
+<table>
+<thead>
+<tr>
+<th>Team</th>
+<th>SoS</th>
+<th>Power</th>
+<th>Offense</th>
+<th>Defense</th>
+<th>Record</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>San Bruno Storm 8C - Junio</td>
+<td><span class='stat tough'>+5.7</span></td>
+<td><span class='stat good'>+7.1</span></td>
+<td><span class='stat good'>+2.1</span></td>
+<td><span class='stat good'>+4.8</span></td>
+<td>7-4-2</td>
+</tr>
+<tr>
+<td>Force 8U Comp</td>
+<td><span class='stat tough'>+5.2</span></td>
+<td><span class='stat good'>+7.9</span></td>
+<td><span class='stat good'>+3.9</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td>12-8-0</td>
+</tr>
+<tr>
+<td>Redhawks 8U Red</td>
+<td><span class='stat tough'>+5.2</span></td>
+<td><span class='stat neu'>-0.0</span></td>
+<td><span class='stat neu'>+0.7</span></td>
+<td><span class='stat bad'>-0.8</span></td>
+<td>2-13-1</td>
+</tr>
+<tr>
+<td>Redwood City Wicked 8C - Cho</td>
+<td><span class='stat tough'>+4.9</span></td>
+<td><span class='stat good'>+9.2</span></td>
+<td><span class='stat good'>+3.7</span></td>
+<td><span class='stat good'>+5.3</span></td>
+<td>18-3-2</td>
+</tr>
+<tr>
+<td>8C Burlingame Flames 2026 8U</td>
+<td><span class='stat tough'>+4.9</span></td>
+<td><span class='stat good'>+4.4</span></td>
+<td><span class='stat good'>+3.5</span></td>
+<td><span class='stat neu'>+0.8</span></td>
+<td>10-13-0</td>
+</tr>
+<tr class='opp'><td><strong>8u Slammers Comp</strong> <span class='oppbadge'>next opp</span></td>
+<td><span class='stat tough'>+4.2</span></td>
+<td><span class='stat good'>+2.6</span></td>
+<td><span class='stat good'>+1.8</span></td>
+<td><span class='stat neu'>+0.6</span></td>
+<td>9-9-0</td>
+</tr>
+<tr>
+<td>Rebels Black - McKeon 8U</td>
+<td><span class='stat tough'>+4.0</span></td>
+<td><span class='stat good'>+6.1</span></td>
+<td><span class='stat good'>+2.4</span></td>
+<td><span class='stat good'>+3.5</span></td>
+<td>15-3-2</td>
+</tr>
+<tr>
+<td>Livermore Smoke 8U - Summer 26’</td>
+<td><span class='stat tough'>+3.5</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td><span class='stat neu'>+0.3</span></td>
+<td><span class='stat good'>+3.4</span></td>
+<td>6-6-1</td>
+</tr>
+<tr>
+<td>WVSlammers 8U Red Summer All Stars</td>
+<td><span class='stat tough'>+3.3</span></td>
+<td><span class='stat good'>+8.3</span></td>
+<td><span class='stat good'>+3.9</span></td>
+<td><span class='stat good'>+4.3</span></td>
+<td>17-3-0</td>
+</tr>
+<tr class='you'><td><strong>8U Mischiefs C 8U</strong> <span class='youbadge'>you</span></td>
+<td><span class='stat tough'>+2.9</span></td>
+<td><span class='stat good'>+4.0</span></td>
+<td><span class='stat good'>+2.3</span></td>
+<td><span class='stat good'>+1.6</span></td>
+<td>9-11-1</td>
+</tr>
+<tr>
+<td>SRVGAL Stompers Elite 8U-Valdivia</td>
+<td><span class='stat tough'>+1.5</span></td>
+<td><span class='stat good'>+4.9</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td><span class='stat good'>+3.8</span></td>
+<td>7-3-0</td>
+</tr>
+<tr>
+<td>Foster City Flash 8U</td>
+<td><span class='stat tough'>+0.8</span></td>
+<td><span class='stat good'>+1.7</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td><span class='stat neu'>+0.6</span></td>
+<td>12-5-3</td>
+</tr>
+<tr>
+<td>Blaze 8u Sullivan 8U</td>
+<td><span class='stat neu'>+0.2</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat neu'>-0.7</span></td>
+<td><span class='stat good'>+0.8</span></td>
+<td>6-4-0</td>
+</tr>
+<tr>
+<td>Steal Breeze Fahy 8U</td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat neu'>-0.1</span></td>
+<td><span class='stat neu'>-0.1</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td>6-3-1</td>
+</tr>
+<tr>
+<td>Milpitas 8u AS 2026</td>
+<td><span class='stat neu'>-0.0</span></td>
+<td><span class='stat bad'>-1.3</span></td>
+<td><span class='stat bad'>-1.7</span></td>
+<td><span class='stat neu'>+0.4</span></td>
+<td>4-5-0</td>
+</tr>
+<tr class='opp'><td><strong>Wicked Purple 8U</strong> <span class='oppbadge'>next opp</span></td>
+<td><span class='stat neu'>-0.4</span></td>
+<td><span class='stat good'>+5.8</span></td>
+<td><span class='stat good'>+2.9</span></td>
+<td><span class='stat good'>+2.9</span></td>
+<td>9-1-0</td>
+</tr>
+<tr>
+<td>Almaden Lightning 8U</td>
+<td><span class='stat soft'>-0.4</span></td>
+<td><span class='stat good'>+3.0</span></td>
+<td><span class='stat good'>+2.1</span></td>
+<td><span class='stat good'>+1.0</span></td>
+<td>8-1-0</td>
+</tr>
+<tr>
+<td>Legacy 8U</td>
+<td><span class='stat soft'>-0.6</span></td>
+<td><span class='stat good'>+2.4</span></td>
+<td><span class='stat good'>+1.3</span></td>
+<td><span class='stat good'>+1.1</span></td>
+<td>3-1-0</td>
+</tr>
+<tr>
+<td>PHBA Panthers 8u Red - McLennan 8U</td>
+<td><span class='stat soft'>-1.0</span></td>
+<td><span class='stat neu'>-0.2</span></td>
+<td><span class='stat good'>+2.8</span></td>
+<td><span class='stat bad'>-3.0</span></td>
+<td>2-2-0</td>
+</tr>
+<tr>
+<td>Windsor Wicked Gray 8U</td>
+<td><span class='stat soft'>-1.5</span></td>
+<td><span class='stat bad'>-2.0</span></td>
+<td><span class='stat neu'>+0.5</span></td>
+<td><span class='stat bad'>-2.4</span></td>
+<td>3-6-0</td>
+</tr>
+<tr>
+<td>Vacaville All Stars 8U</td>
+<td><span class='stat soft'>-1.7</span></td>
+<td><span class='stat neu'>-0.8</span></td>
+<td><span class='stat good'>+2.3</span></td>
+<td><span class='stat bad'>-3.0</span></td>
+<td>6-4-0</td>
+</tr>
+<tr>
+<td>WV Slammers Blue 8U-Hernandez</td>
+<td><span class='stat soft'>-1.9</span></td>
+<td><span class='stat bad'>-0.9</span></td>
+<td><span class='stat neu'>+0.1</span></td>
+<td><span class='stat bad'>-0.9</span></td>
+<td>9-9-0</td>
+</tr>
+</tbody>
+</table>
+<h2>Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Power rating (Massey)</strong></td>
+<td>Overall strength in runs vs. an average team in this pool. +3 ≈ three runs better than average. Solved by least-squares over every game margin.</td>
+</tr>
+<tr>
+<td><strong>Elo</strong></td>
+<td>Independent strength score (starts at 1500) updated game-by-game; a cross-check on Massey. Higher = stronger; ~100 pts ≈ a meaningful gap.</td>
+</tr>
+<tr>
+<td><strong>Offense (adj)</strong></td>
+<td>Opponent-adjusted runs scored vs. average. +1.5 means they score ~1.5 runs more than a typical team would against the <em>same</em> defenses.</td>
+</tr>
+<tr>
+<td><strong>Defense (adj)</strong></td>
+<td>Opponent-adjusted runs <em>prevented</em> vs. average. <strong>Positive = good defense</strong> (they allow fewer runs than a typical team would vs. the same offenses).</td>
+</tr>
+<tr>
+<td><strong>runs scored/allowed per game</strong></td>
+<td>Raw, unadjusted averages — easy to read but flattered or punished by schedule strength.</td>
+</tr>
+<tr>
+<td><strong>Strength of schedule (SoS)</strong></td>
+<td>Average power rating of the opponents a team has faced. Amber = tough slate, blue = soft slate.</td>
+</tr>
+<tr>
+<td><strong>Projected runs / win prob</strong></td>
+<td>Expected final margin and win chance for your matchup, blending the rating gap, common opponents, and any head-to-head.</td>
+</tr>
+<tr>
+<td><strong>Common opponents</strong></td>
+<td>Teams both you and the opponent have played; comparing your margins vs. theirs controls for schedule.</td>
+</tr>
+<tr>
+<td><strong>Head-to-head (h2h)</strong></td>
+<td>Games you've played against that opponent directly.</td>
+</tr>
+<tr>
+<td><strong>Confidence</strong></td>
+<td>How much data backs the projection (common-opponent count + h2h + games played).</td>
+</tr>
+<tr>
+<td><strong>Home-field</strong></td>
+<td>Estimated run value of playing at home, from the model.</td>
+</tr>
+</tbody>
+</table>
+<h2>Notes &amp; caveats</h2>
+<ul>
+<li>Ratings come from a Massey least-squares model on game margins (home-field + ridge regularization); Elo is a chronological cross-check.</li>
+<li>Offense/Defense ratings are a separate opponent-adjusted least-squares split, so facing weak teams inflates raw runs but not the adjusted numbers.</li>
+<li>Only <strong>seed teams</strong> (ids you passed) have full schedules; other teams appear only via games against the seeds, so their ratings are based on partial data.</li>
+<li>Youth results are noisy and team-name matching across feeds is fuzzy — treat projections as directional. Confidence reflects common-opponent count + head-to-head.</li>
+<li>To deepen strength-of-schedule, add more team ids as seeds (see the unresolved opponents listed by <code>main.py</code>).</li>
+</ul>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+const POWER = {"labels": ["Redwood City Wi\u2026", "WVSlammers 8U R\u2026", "Force 8U Comp", "San Bruno Storm\u2026", "Rebels Black - \u2026", "Wicked Purple 8U", "SRVGAL Stompers\u2026", "8C Burlingame F\u2026", "8U Mischiefs C \u2026", "Livermore Smoke\u2026", "Almaden Lightni\u2026", "8u Slammers Comp", "Legacy 8U", "Foster City Fla\u2026", "Blaze 8u Sulliv\u2026", "Redhawks 8U Red", "Steal Breeze Fa\u2026", "PHBA Panthers 8\u2026", "Vacaville All S\u2026", "WV Slammers Blu\u2026", "Milpitas 8u AS \u2026", "Windsor Wicked \u2026"], "values": [9.21, 8.35, 7.94, 7.09, 6.11, 5.84, 4.92, 4.4, 3.98, 3.77, 3.03, 2.64, 2.38, 1.72, 0.1, -0.02, -0.1, -0.22, -0.79, -0.88, -1.32, -1.99], "colors": ["#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#0d9488", "#9ca3af", "#9ca3af", "#ff6b00", "#9ca3af", "#9ca3af", "#0d9488", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af", "#9ca3af"]};
+const OFFDEF = {"You": [{"x": 2.27, "y": 1.56, "label": "8U Mischiefs C 8U"}], "Opponents": [{"x": 1.85, "y": 0.64, "label": "8u Slammers Comp"}, {"x": 2.9, "y": 2.92, "label": "Wicked Purple 8U"}], "Other": [{"x": 2.43, "y": 3.53, "label": "Rebels Black - Mc\u2026"}, {"x": 2.1, "y": 4.83, "label": "San Bruno Storm 8\u2026"}, {"x": 0.68, "y": -0.82, "label": "Redhawks 8U Red"}, {"x": 3.95, "y": 3.83, "label": "Force 8U Comp"}, {"x": 3.94, "y": 4.28, "label": "WVSlammers 8U Red\u2026"}, {"x": -0.15, "y": 0.09, "label": "Steal Breeze Fahy\u2026"}, {"x": 3.49, "y": 0.77, "label": "8C Burlingame Fla\u2026"}, {"x": -1.68, "y": 0.36, "label": "Milpitas 8u AS 20\u2026"}, {"x": 0.26, "y": 3.36, "label": "Livermore Smoke 8\u2026"}, {"x": 3.7, "y": 5.35, "label": "Redwood City Wick\u2026"}, {"x": 1.11, "y": 3.75, "label": "SRVGAL Stompers E\u2026"}, {"x": 0.53, "y": -2.42, "label": "Windsor Wicked Gr\u2026"}, {"x": 1.07, "y": 0.63, "label": "Foster City Flash\u2026"}, {"x": 2.31, "y": -3.03, "label": "Vacaville All Sta\u2026"}, {"x": 2.81, "y": -2.97, "label": "PHBA Panthers 8u \u2026"}, {"x": 2.1, "y": 0.97, "label": "Almaden Lightning\u2026"}, {"x": 0.12, "y": -0.87, "label": "WV Slammers Blue \u2026"}, {"x": -0.69, "y": 0.81, "label": "Blaze 8u Sullivan\u2026"}, {"x": 1.27, "y": 1.11, "label": "Legacy 8U"}]};
+const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+const grid = dark ? '#3a3a3a' : '#e3e3e3';
+const tick = dark ? '#d7dee8' : '#444';
+Chart.register(ChartDataLabels);
+
+// --- Power rankings (horizontal bars) ---
+new Chart(document.getElementById('powerChart'), {
+  type: 'bar',
+  data: { labels: POWER.labels,
+    datasets: [{ label: 'Power (runs vs avg)', data: POWER.values,
+      backgroundColor: POWER.colors, borderRadius: 4 }] },
+  options: { indexAxis: 'y', responsive: true,
+    plugins: { legend: { display: false },
+      title: { display: true, text: 'Power rankings (Massey, runs vs. average)', color: tick },
+      datalabels: { anchor: 'end', align: 'end', color: tick,
+        formatter: v => (v >= 0 ? '+' : '') + v.toFixed(1) } },
+    scales: { x: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'runs vs. average', color: tick } },
+      y: { grid: { display: false }, ticks: { color: tick } } } }
+});
+
+// --- Offense vs Defense quadrant scatter ---
+const mkPts = (arr, c) => ({ data: arr, backgroundColor: c, pointRadius: 7,
+  pointHoverRadius: 9 });
+// guideline plugin: draw axes at 0,0 to split the four quadrants
+const quad = { id: 'quad', beforeDraw(c) {
+  const {ctx, chartArea: a, scales} = c;
+  const x0 = scales.x.getPixelForValue(0), y0 = scales.y.getPixelForValue(0);
+  ctx.save(); ctx.strokeStyle = dark ? '#555' : '#bbb'; ctx.setLineDash([5,4]);
+  ctx.beginPath(); ctx.moveTo(x0, a.top); ctx.lineTo(x0, a.bottom);
+  ctx.moveTo(a.left, y0); ctx.lineTo(a.right, y0); ctx.stroke(); ctx.restore();
+} };
+new Chart(document.getElementById('offDefChart'), {
+  type: 'scatter',
+  data: { datasets: [
+    Object.assign(mkPts(OFFDEF.You, '#ff6b00'), { label: 'You' }),
+    Object.assign(mkPts(OFFDEF.Opponents, '#0d9488'), { label: 'Opponents' }),
+    Object.assign(mkPts(OFFDEF.Other, '#9ca3af'), { label: 'Other seeds' }),
+  ] },
+  plugins: [quad],
+  options: { responsive: true,
+    plugins: { legend: { labels: { color: tick } },
+      title: { display: true, text: 'Offense vs. Defense (top-right = strong both sides)', color: tick },
+      datalabels: { align: 'right', offset: 6, color: tick, font: { size: 10 },
+        formatter: (v, ctx) => ctx.dataset.data[ctx.dataIndex].label },
+      tooltip: { callbacks: { label: c => `${c.raw.label}: off ${c.raw.x}, def ${c.raw.y}` } } },
+    scales: {
+      x: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'Offense  →  scores more', color: tick } },
+      y: { grid: { color: grid }, ticks: { color: tick },
+        title: { display: true, text: 'Defense  →  allows fewer', color: tick } } } }
+});
+</script>
+</body></html>

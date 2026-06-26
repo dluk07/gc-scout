@@ -54,32 +54,58 @@ coach-API probe scripts; see below.)
 
 ## Run
 
-Grab the short ids from each team's `web.gc.com/teams/<id>/...` URL, then:
+The easiest way is a **teams file** — list each team's `web.gc.com` URL (the 12-char id is
+parsed out for you) with a role prefix. Copy `teams.example.txt` to `teams.txt` and edit:
 
-```bash
-python main.py --me 9rpA1Riw3pSY --opponents U3SbqWb4YPke,BUZ2EzE23lWB
-python main.py --me <id> --opponents <id1>,<id2> --refresh        # bust the cache
-python main.py --me <id> --opponents <id1>,<id2> --extra <id3>,<id4>   # deepen SoS
-python main.py --me <id> --opponents <id1>,<id2> --publish        # also write docs/index.html
+```text
+me     https://web.gc.com/teams/9rpA1Riw3pSY/2026-summer-8u-mischiefs-c-8u/schedule
+opp    https://web.gc.com/teams/U3SbqWb4YPke/
+opp    https://web.gc.com/teams/BUZ2EzE23lWB/
+extra  https://web.gc.com/teams/opJMxaYM6zHS/
 ```
 
-It prints a quick projection and writes `reports/scouting_<date>.{html,md,csv}` (the HTML
-opens automatically). `--publish` also copies the HTML to `docs/index.html`, which is what
-GitHub Pages serves at the live link above. To deepen strength-of-schedule, look up the
-opponents it lists as "non-seed" on web.gc.com and pass their ids via `--opponents`/`--extra`.
+Then:
+
+```bash
+python main.py --teams teams.txt                 # prompts you to name the report
+python main.py --teams teams.txt --publish        # also adds it to the hosted index
+python main.py --teams teams.txt --refresh        # bust the 6h cache
+```
+
+Each run **asks you to name the report** (e.g. `8U Scouting Report for 6/27 10:30am`); that
+name becomes the page title, the heading, and the filename. Pass `--name "..."` to skip the
+prompt (e.g. for scripts). You can still use inline ids instead of a file:
+
+```bash
+python main.py --me 9rpA1Riw3pSY --opponents U3SbqWb4YPke,BUZ2EzE23lWB --name "..." 
+```
+
+Outputs land in `reports/<slug>.{html,md,csv}` (the HTML opens automatically). With
+`--publish`, the report is copied to `docs/r/<slug>.html` and the **GitHub Pages index**
+(`docs/index.html`) is rebuilt to list every report, newest first — then commit & push:
+
+```bash
+gh auth switch --user dluk07 && git add -A && git commit -m "report: <name>" && git push
+gh auth switch --user danieluk_cisco        # restore work account
+```
+
+To deepen strength-of-schedule, add more teams as `extra` lines (look up the "non-seed"
+opponents the run prints on web.gc.com).
 
 ## Files
 
-- `main.py` — CLI
+- `main.py` — CLI (teams-file parsing, report naming, publish/index)
 - `gc_api.py` — public API client + on-disk cache (`cache/`, 6h TTL)
 - `crawl.py` — collection + name normalization + dedup
 - `analyze.py` — Massey/Elo ratings, opponent-adjusted offense/defense, SoS, projection
-- `report.py` — Markdown + CSV + charted HTML output
-- `docs/index.html` — the published report (GitHub Pages source)
+- `report.py` — Markdown + CSV + charted HTML + the Pages index page
+- `teams.example.txt` — template teams file
+- `docs/` — GitHub Pages site: `index.html` (report list), `r/<slug>.html`, `reports.json`
 
 ## Notes
 
-- `.env`, `cache/`, `reports/`, `games.json`, and the `probe*.py` discovery scripts are
-  gitignored (the probes need a `GC_TOKEN` and held captured tokens, so they stay local).
+- `.env`, `teams.txt`, `cache/`, `reports/`, `games.json`, and the `probe*.py` discovery
+  scripts are gitignored (the probes need a `GC_TOKEN` and held captured tokens, so they
+  stay local). Want your `teams.txt` versioned? Un-ignore it — it's just public URLs.
 - Caching: per-team JSON under `cache/`; `--refresh` to refetch.
 - `TBD …` placeholder opponents are ignored automatically.
