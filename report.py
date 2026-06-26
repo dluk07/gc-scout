@@ -250,6 +250,9 @@ ul { padding-left: 1.2rem; }
 .replist a { font-weight: 600; font-size: 1.05rem; text-decoration: none; color: #c2410c; }
 .replist a:hover { text-decoration: underline; }
 .gen { color: #888; font-size: .85rem; }
+th.sortcol { cursor: pointer; user-select: none; white-space: nowrap; }
+th.sortcol:hover { background: #ffe6cf; }
+th .arrow { font-size: .8em; color: #ff6b00; }
 @media (prefers-color-scheme: dark) {
   body { color: #e6e6e6; background: #1e1e1e; }
   h2 { border-color: #444; } th { background: #3a2a1a; }
@@ -259,6 +262,7 @@ ul { padding-left: 1.2rem; }
   th, td { border-color: #444; }
   .replist li { border-color: #383838; } .replist a { color: #fb923c; }
   .gen { color: #999; }
+  th.sortcol:hover { background: #4a3520; } th .arrow { color: #fb923c; }
   .stat.good { color: #4ade80; } .stat.bad { color: #f87171; }
   .stat.neu { color: #d7dee8; } .stat.tough { color: #fb923c; } .stat.soft { color: #54c1f5; }
   .chart-wrap { background: #242424; border-color: #383838; }
@@ -371,6 +375,61 @@ new Chart(document.getElementById('offDefChart'), {{
     return power_canvas, offdef_canvas, script
 
 
+_SORT_SCRIPT = """
+<script>
+(function () {
+  function num(cell) {
+    var n = parseFloat((cell.textContent || "").replace(/[^0-9.+-]/g, ""));
+    return isNaN(n) ? null : n;
+  }
+  function sortTable(tbl, col, th) {
+    var body = tbl.tBodies[0];
+    var rows = Array.prototype.slice.call(body.rows);
+    var numeric = rows.every(function (r) {
+      var c = r.cells[col]; return !c || c.textContent.trim() === "" || num(c) !== null;
+    });
+    var dir = th.getAttribute("data-dir") === "desc" ? "asc" : "desc";
+    var heads = tbl.tHead.rows[0].cells;
+    for (var h = 0; h < heads.length; h++) {
+      heads[h].removeAttribute("data-dir");
+      var old = heads[h].querySelector(".arrow"); if (old) old.remove();
+    }
+    th.setAttribute("data-dir", dir);
+    var arrow = document.createElement("span");
+    arrow.className = "arrow";
+    arrow.textContent = dir === "asc" ? " \\u25B2" : " \\u25BC";
+    th.appendChild(arrow);
+    rows.sort(function (a, b) {
+      var ca = a.cells[col], cb = b.cells[col], cmp;
+      if (numeric) {
+        var na = num(ca), nb = num(cb);
+        na = na === null ? -Infinity : na; nb = nb === null ? -Infinity : nb;
+        cmp = na - nb;
+      } else {
+        cmp = (ca.textContent || "").trim().localeCompare((cb.textContent || "").trim());
+      }
+      return dir === "asc" ? cmp : -cmp;
+    });
+    rows.forEach(function (r) { body.appendChild(r); });
+  }
+  document.querySelectorAll("table").forEach(function (tbl) {
+    if (!tbl.tHead) return;
+    var heads = Array.prototype.slice.call(tbl.tHead.rows[0].cells);
+    var isSoS = heads.some(function (th) {
+      return /^(SoS|Power|Offense|Defense)$/i.test(th.textContent.trim());
+    });
+    if (!isSoS) return;
+    heads.forEach(function (th, i) {
+      th.classList.add("sortcol");
+      th.title = "Click to sort";
+      th.addEventListener("click", function () { sortTable(tbl, i, th); });
+    });
+  });
+})();
+</script>
+"""
+
+
 def render_html(md_text, result, me_name, opp_names, title="GC Scouting Report"):
     import re
     import markdown
@@ -385,7 +444,7 @@ def render_html(md_text, result, me_name, opp_names, title="GC Scouting Report")
     return (f"<!doctype html><html><head><meta charset='utf-8'>"
             f"<meta name='viewport' content='width=device-width, initial-scale=1'>"
             f"<title>{html.escape(title)}</title><style>{_CSS}</style></head>"
-            f"<body>{body}{script}</body></html>")
+            f"<body>{body}{script}{_SORT_SCRIPT}</body></html>")
 
 
 def render_index(entries, heading="8U Scouting Reports"):
