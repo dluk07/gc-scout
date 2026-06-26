@@ -90,10 +90,12 @@ def render_markdown(data, result, me_name, opp_names, title="GameChanger Scoutin
                  f"{len(data['games'])} games across {len(data['teams'])} teams · "
                  f"home-field ≈ {_fmt_margin(result['home_adv'])} runs_\n")
 
+    # Your team stats — top of page
+    lines.append("## Your team\n")
+    lines.append(_scouting_card(me))
+
     # Interactive matchup explorer — the primary projection tool (picker + JS in HTML render)
     lines.append("## Matchup explorer\n")
-    lines.append(f"Your team: **<span class='team'>{me.get('display', me_name)}</span>** "
-                 f"— power rating {_signed(me.get('massey',0))}\n")
     lines.append("_Pick an opponent from the tournament field to get the projection, what to "
                  "prepare for, common opponents, and their last 5 games — computed instantly._\n")
     lines.append("[[MATCHUP_EXPLORER]]")
@@ -105,33 +107,24 @@ def render_markdown(data, result, me_name, opp_names, title="GameChanger Scoutin
                  "bottom-left = beatable both sides. Your team is highlighted._\n")
     lines.append("[[OFFDEF_CHART]]")
 
-    # Scouting cards
-    lines.append("\n## Scouting cards\n")
-    lines.append(_scouting_card(me))
-    for p in result["projections"]:
-        o = summ.get(p["opp"])
-        if o:
-            lines.append(_scouting_card(o))
-            lines.append(f"**Common opponents vs you:**\n")
-            lines.append(_common_table(p["common"], summ))
-
-    # SoS leaderboard among seeds
+    # SoS leaderboard among seeds — the "#" rank column renumbers live when you sort
     opp_set = set(opp_names)
     seeds = [(cn, s) for cn, s in summ.items() if s["is_seed"]]
     seeds.sort(key=lambda kv: kv[1]["sos"], reverse=True)
     lines.append("## Strength of schedule (seed teams)\n")
-    lines.append("| Team | SoS | Power | Offense | Defense | Record |")
-    lines.append("|---|---|---|---|---|---|")
-    for cn, s in seeds:
+    lines.append("| # | Team | SoS | Power | Offense | Defense | Record |")
+    lines.append("|---|---|---|---|---|---|---|")
+    for i, (cn, s) in enumerate(seeds, 1):
         if cn == me_name:
-            name = (f"<span class='you-row'></span>**{s['display']}** "
-                    f"<span class='youbadge'>you</span>")
+            rank = f"<span class='you-row'></span>{i}"
+            team = f"**{s['display']}** <span class='youbadge'>you</span>"
         elif cn in opp_set:
-            name = (f"<span class='opp-row'></span>**{s['display']}** "
-                    f"<span class='oppbadge'>next opp</span>")
+            rank = f"<span class='opp-row'></span>{i}"
+            team = f"**{s['display']}** <span class='oppbadge'>next opp</span>"
         else:
-            name = s['display']
-        lines.append(f"| {name} | {_sos(s['sos'])} | "
+            rank = str(i)
+            team = s['display']
+        lines.append(f"| {rank} | {team} | {_sos(s['sos'])} | "
                      f"{_signed(s['massey'])} | {_signed(s['off'])} | "
                      f"{_signed(s['def'])} | {_rec(s['api_record'])} |")
 
@@ -560,6 +553,7 @@ def _explorer_html(result, data, me_name, opp_names):
 
 _SORT_SCRIPT = """
 <script>
+(function () {
   function num(cell) {
     var n = parseFloat((cell.textContent || "").replace(/[^0-9.+-]/g, ""));
     return isNaN(n) ? null : n;
@@ -593,6 +587,18 @@ _SORT_SCRIPT = """
       return dir === "asc" ? cmp : -cmp;
     });
     rows.forEach(function (r) { body.appendChild(r); });
+    renumber(tbl);
+  }
+  function renumber(tbl) {
+    var heads = tbl.tHead.rows[0].cells, rc = -1;
+    for (var i = 0; i < heads.length; i++) {
+      if (heads[i].textContent.trim() === "#") { rc = i; break; }
+    }
+    if (rc < 0) return;
+    var rows = tbl.tBodies[0].rows;
+    for (var r = 0; r < rows.length; r++) {
+      if (rows[r].cells[rc]) rows[r].cells[rc].textContent = (r + 1);
+    }
   }
   document.querySelectorAll("table").forEach(function (tbl) {
     if (!tbl.tHead) return;
@@ -602,10 +608,12 @@ _SORT_SCRIPT = """
     });
     if (!isSoS) return;
     heads.forEach(function (th, i) {
+      if (th.textContent.trim() === "#") return;   // rank column isn't sortable
       th.classList.add("sortcol");
       th.title = "Click to sort";
       th.addEventListener("click", function () { sortTable(tbl, i, th); });
     });
+    renumber(tbl);
   });
 })();
 </script>
